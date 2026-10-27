@@ -87,6 +87,27 @@ async function applyFilter(imageBuffer, filterName) {
  * @param {Array<string>} rawPhotoBase64Array Array of base64 image strings from camera
  * @param {Object} options Layout, frameColor, frameTheme, filter, brandingText
  */
+//Diesnat frame variants: photo rects lifted from each frame's transparent
+// holes (pct of canvas + 0.6% pad), scanned from the PNG files
+const DIESNAT_SLOT_RECTS = {
+  'diesnat-3x2_1': [
+    [0.1109, 0.1465, 0.2584, 0.1577],
+    [0.6164, 0.1465, 0.2584, 0.1577],
+    [0.1109, 0.3836, 0.2584, 0.1662],
+    [0.6164, 0.3836, 0.2584, 0.1662],
+    [0.1109, 0.6242, 0.2584, 0.1695],
+    [0.6164, 0.6242, 0.2584, 0.1695]
+  ],
+  'diesnat-3x2_2': [
+    [0.1464, 0.0685, 0.3117, 0.2102],
+    [0.6468, 0.0685, 0.3092, 0.2102],
+    [0.1515, 0.3006, 0.3092, 0.2102],
+    [0.6418, 0.3006, 0.3092, 0.2102],
+    [0.1464, 0.5395, 0.3117, 0.2119],
+    [0.6418, 0.5411, 0.3092, 0.2102]
+  ]
+};
+
 async function createPhotoCollage(rawPhotoBase64Array, options = {}) {
   const {
     layout = '3x2-grid',
@@ -136,19 +157,11 @@ async function createPhotoCollage(rawPhotoBase64Array, options = {}) {
       const col = i % 2;
       const row = Math.floor(i / 2);
 
-      // Diesnat frame: photo rects lifted from its transparent holes
-      // (pct of canvas + 0.6% pad) so photos sit exactly under the cutouts
+      // Diesnat variants: photos sit exactly under the transparent cutouts
       let leftPx, topPx, itemWidthPx, itemHeightPx;
-      if (frameTheme === 'diesnat-2x3_1') {
-        const rects = [
-          [0.1109, 0.1465, 0.2584, 0.1577],
-          [0.6164, 0.1465, 0.2584, 0.1577],
-          [0.1109, 0.3836, 0.2584, 0.1662],
-          [0.6164, 0.3836, 0.2584, 0.1662],
-          [0.1109, 0.6242, 0.2584, 0.1695],
-          [0.6164, 0.6242, 0.2584, 0.1695]
-        ];
-        const [rx, ry, rw, rh] = rects[i];
+      const diesnatRects = DIESNAT_SLOT_RECTS[frameTheme];
+      if (diesnatRects) {
+        const [rx, ry, rw, rh] = diesnatRects[i];
         itemWidthPx = Math.round(rw * canvasWidth);
         itemHeightPx = Math.round(rh * canvasHeight);
         leftPx = Math.round(rx * canvasWidth);

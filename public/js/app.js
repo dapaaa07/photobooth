@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     targetShots: 3,   // Default 3 camera photos for 3x2 grid
     currentShotIndex: 0,
     photos: [],       // Holds raw camera photos [A, B, C]
-    frameTheme: 'diesnat-2x3_1',
+    frameTheme: 'diesnat-3x2_1',
     filter: 'normal',
     brandingText: 'DIESNATALIS HIMATIKOM 2026',
     renderedFileName: null,
@@ -392,13 +392,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --- SCREEN 4: EDITOR ---
-  // Frame Theme Selection Chips; Diesnat has holes for the 6-slot sheet
-  // only, so other layouts fall back to Genesis
+
+  // Frame Theme Selection Chips; Diesnat frames have holes for the
+  // 6-slot sheet only, so other layouts fall back to Genesis
   const themeChips = document.querySelectorAll('.theme-chip');
   themeChips.forEach(chip => {
     chip.addEventListener('click', () => {
       let target = chip;
-      if (chip.dataset.theme === 'diesnat-2x3_1' && state.selectedLayout !== '3x2-grid') {
+      if (chip.dataset.theme.startsWith('diesnat-3x2') && state.selectedLayout !== '3x2-grid') {
         const genesis = [...themeChips].find(t => t.dataset.theme === 'genesis-editorial');
         if (genesis) target = genesis;
       }

@@ -8,7 +8,7 @@ class PhotoboothEditor {
     this.photos = [];
     this.layout = '3x2-grid';
     this.frameColor = '#ffffff';
-    this.frameTheme = 'diesnat-2x3_1';
+    this.frameTheme = 'diesnat-3x2_1';
     this.filter = 'normal';
     this.brandingText = 'DIESNATALIS HIMATIKOM 2026';
     this.loadedFrameImage = null;
@@ -49,20 +49,26 @@ class PhotoboothEditor {
 
   setFrameTheme(themeName) {
     this.frameTheme = themeName;
+    // Token guard: the newest request wins; stale image loads are ignored
+    const token = (this._themeToken = (this._themeToken || 0) + 1);
     if (themeName && themeName !== 'default') {
       const img = new Image();
       img.onload = () => {
+        if (token !== this._themeToken) return;
         this.loadedFrameImage = img;
         this.render();
       };
       img.onerror = () => {
+        if (token !== this._themeToken) return;
         // Fallback: try loading as PNG if SVG does not exist
         const imgPng = new Image();
         imgPng.onload = () => {
+          if (token !== this._themeToken) return;
           this.loadedFrameImage = imgPng;
           this.render();
         };
         imgPng.onerror = () => {
+          if (token !== this._themeToken) return;
           this.loadedFrameImage = null;
           this.render();
         };
@@ -167,16 +173,23 @@ class PhotoboothEditor {
 
     // 2. Render photo placements (ALL PORTRAIT SLOTS)
     if (this.layout === '3x2-grid') {
-      if (this.frameTheme === 'diesnat-2x3_1') {
-        // Rects lifted from the frame's transparent holes (pct + 0.6% pad),
-        // scanned from public/assets/frames/diesnat-2x3_1.png
-        const rects = [
+      if (this.frameTheme === 'diesnat-3x2_1' || this.frameTheme === 'diesnat-3x2_2') {
+        // Rects lifted from each frame's transparent holes (pct + 0.6% pad),
+        // scanned from the diesnat PNG files
+        const rects = this.frameTheme === 'diesnat-3x2_1' ? [
           [0.1109, 0.1465, 0.2584, 0.1577],
           [0.6164, 0.1465, 0.2584, 0.1577],
           [0.1109, 0.3836, 0.2584, 0.1662],
           [0.6164, 0.3836, 0.2584, 0.1662],
           [0.1109, 0.6242, 0.2584, 0.1695],
           [0.6164, 0.6242, 0.2584, 0.1695]
+        ] : [
+          [0.1464, 0.0685, 0.3117, 0.2102],
+          [0.6468, 0.0685, 0.3092, 0.2102],
+          [0.1515, 0.3006, 0.3092, 0.2102],
+          [0.6418, 0.3006, 0.3092, 0.2102],
+          [0.1464, 0.5395, 0.3117, 0.2119],
+          [0.6418, 0.5411, 0.3092, 0.2102]
         ];
         for (let i = 0; i < Math.min(6, loadedImages.length); i++) {
           const [rx, ry, rw, rh] = rects[i];

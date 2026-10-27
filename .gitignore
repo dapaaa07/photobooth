@@ -13,8 +13,7 @@ storage/
 .backup-*/
 
 # aset sumber desain di root (tidak dirujuk aplikasi; frame final ada di public/assets/frames/)
-DIESNAT.png
-DIESNAT-no-bg.png
+DIESNAT*.png
 test_photobooth_success.png
 
 # noise OS/mac

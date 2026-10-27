@@ -34,9 +34,6 @@ function expandPhotos(photos, layout) {
   } else if (layout === '2x2-grid') {
     // 2 photos -> 4 slots
     return [A, B, B, A];
-  } else if (layout === '4-strip') {
-    // 2 photos -> 4 slots
-    return [A, B, A, B];
   } else if (layout === '3-strip') {
     // 3 photos -> 3 slots
     return [A, B, C];
@@ -87,36 +84,58 @@ async function applyFilter(imageBuffer, filterName) {
  * @param {Array<string>} rawPhotoBase64Array Array of base64 image strings from camera
  * @param {Object} options Layout, frameColor, frameTheme, filter, brandingText
  */
-//Diesnat frame variants: photo rects lifted from each frame's transparent
-// holes (pct of canvas + 0.6% pad), scanned from the PNG files
+// Diesnat frame variants: photo rects lifted from each frame's transparent
+// holes (pct of canvas + 0.6% pad), scanned from the PNG files.
+// Layouts without an entry (2x2-grid, polaroid) render frameless by design.
 const DIESNAT_SLOT_RECTS = {
-  'diesnat-3x2_1': [
-    [0.1109, 0.1465, 0.2584, 0.1577],
-    [0.6164, 0.1465, 0.2584, 0.1577],
-    [0.1109, 0.3836, 0.2584, 0.1662],
-    [0.6164, 0.3836, 0.2584, 0.1662],
-    [0.1109, 0.6242, 0.2584, 0.1695],
-    [0.6164, 0.6242, 0.2584, 0.1695]
-  ],
-  'diesnat-3x2_2': [
-    [0.1464, 0.0685, 0.3117, 0.2102],
-    [0.6468, 0.0685, 0.3092, 0.2102],
-    [0.1515, 0.3006, 0.3092, 0.2102],
-    [0.6418, 0.3006, 0.3092, 0.2102],
-    [0.1464, 0.5395, 0.3117, 0.2119],
-    [0.6418, 0.5411, 0.3092, 0.2102]
-  ]
+  '3x2-grid': {
+    'diesnat-3x2_1': [
+      [0.1109, 0.1465, 0.2584, 0.1577],
+      [0.6164, 0.1465, 0.2584, 0.1577],
+      [0.1109, 0.3836, 0.2584, 0.1662],
+      [0.6164, 0.3836, 0.2584, 0.1662],
+      [0.1109, 0.6242, 0.2584, 0.1695],
+      [0.6164, 0.6242, 0.2584, 0.1695]
+    ],
+    'diesnat-3x2_2': [
+      [0.1464, 0.0685, 0.3117, 0.2102],
+      [0.6468, 0.0685, 0.3092, 0.2102],
+      [0.1515, 0.3006, 0.3092, 0.2102],
+      [0.6418, 0.3006, 0.3092, 0.2102],
+      [0.1464, 0.5395, 0.3117, 0.2119],
+      [0.6418, 0.5411, 0.3092, 0.2102]
+    ]
+  },
+  '3-strip': {
+    'diesnat-3x1_1': [
+      [0.1361, 0.1108, 0.7125, 0.1796],
+      [0.1514, 0.3766, 0.7074, 0.1796],
+      [0.1514, 0.6424, 0.7125, 0.1779]
+    ]
+  }
 };
+
+// Force a layout-compatible theme: mismatched themes fall back to the
+// layout default, frameless layouts resolve to null (photos only)
+function resolveFrameTheme(layout, frameTheme) {
+  const themes = DIESNAT_SLOT_RECTS[layout];
+  if (!themes) return null;
+  return themes[frameTheme] ? frameTheme : Object.keys(themes)[0];
+}
 
 async function createPhotoCollage(rawPhotoBase64Array, options = {}) {
   const {
     layout = '3x2-grid',
     frameColor = '#ffffff',
-    frameTheme = 'genesis-editorial',
+    frameTheme = 'diesnat-3x2_1',
     filter = 'normal',
     brandingText = 'DIESNATALIS HIMATIKOM 2026',
     subText = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })
   } = options;
+
+  // Layout-compatible theme: mismatched combos fall back, frameless
+  // layouts (2x2-grid, polaroid) resolve to null
+  const theme = resolveFrameTheme(layout, frameTheme);
 
   // Interleave raw camera photos into layout slot array
   const fullPhotos = expandPhotos(rawPhotoBase64Array, layout);
@@ -159,7 +178,7 @@ async function createPhotoCollage(rawPhotoBase64Array, options = {}) {
 
       // Diesnat variants: photos sit exactly under the transparent cutouts
       let leftPx, topPx, itemWidthPx, itemHeightPx;
-      const diesnatRects = DIESNAT_SLOT_RECTS[frameTheme];
+      const diesnatRects = (DIESNAT_SLOT_RECTS['3x2-grid'] || {})[theme];
       if (diesnatRects) {
         const [rx, ry, rw, rh] = diesnatRects[i];
         itemWidthPx = Math.round(rw * canvasWidth);
@@ -188,22 +207,41 @@ async function createPhotoCollage(rawPhotoBase64Array, options = {}) {
     // 3 Portrait photos stacked vertically (2400 x 5400 ULTRA HD)
     canvasWidth = 2400;
     canvasHeight = 5400;
-    const itemWidth = 1360;
-    const itemHeight = 1520; // Portrait photo slot
-    const leftMargin = 520;
-    const topMargin = 160;
-    const gap = 100;
 
-    for (let i = 0; i < Math.min(3, photoBuffers.length); i++) {
-      const resized = await sharp(photoBuffers[i])
-        .resize(itemWidth, itemHeight, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
-        .toBuffer();
+    const stripRects = (DIESNAT_SLOT_RECTS['3-strip'] || {})[theme];
+    if (stripRects) {
+      for (let i = 0; i < Math.min(3, photoBuffers.length); i++) {
+        const [rx, ry, rw, rh] = stripRects[i];
+        const itemWidthPx = Math.round(rw * canvasWidth);
+        const itemHeightPx = Math.round(rh * canvasHeight);
+        const resized = await sharp(photoBuffers[i])
+          .resize(itemWidthPx, itemHeightPx, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
+          .toBuffer();
 
-      compositeInputs.push({
-        input: resized,
-        left: leftMargin,
-        top: topMargin + i * (itemHeight + gap)
-      });
+        compositeInputs.push({
+          input: resized,
+          left: Math.round(rx * canvasWidth),
+          top: Math.round(ry * canvasHeight)
+        });
+      }
+    } else {
+      const itemWidth = 1360;
+      const itemHeight = 1520; // Portrait photo slot
+      const leftMargin = 520;
+      const topMargin = 160;
+      const gap = 100;
+
+      for (let i = 0; i < Math.min(3, photoBuffers.length); i++) {
+        const resized = await sharp(photoBuffers[i])
+          .resize(itemWidth, itemHeight, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
+          .toBuffer();
+
+        compositeInputs.push({
+          input: resized,
+          left: leftMargin,
+          top: topMargin + i * (itemHeight + gap)
+        });
+      }
     }
 
   } else if (layout === '2x2-grid') {
@@ -252,33 +290,12 @@ async function createPhotoCollage(rawPhotoBase64Array, options = {}) {
       top: 160
     });
 
-  } else {
-    // 4-Photo Strip (2400 x 6200 ULTRA HD)
-    canvasWidth = 2400;
-    canvasHeight = 6200;
-    const itemWidth = 1280;
-    const itemHeight = 1360; // Portrait photo slot
-    const leftMargin = 560;
-    const topMargin = 140;
-    const gap = 80;
-
-    for (let i = 0; i < Math.min(4, photoBuffers.length); i++) {
-      const resized = await sharp(photoBuffers[i])
-        .resize(itemWidth, itemHeight, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
-        .toBuffer();
-
-      compositeInputs.push({
-        input: resized,
-        left: leftMargin,
-        top: topMargin + i * (itemHeight + gap)
-      });
-    }
   }
 
-  // Overlay Frame theme (supports both PNG transparent overlay and SVG vector)
-  if (frameTheme && frameTheme !== 'default') {
-    const framePngPath = path.join(FRAMES_DIR, `${frameTheme}.png`);
-    const frameSvgPath = path.join(FRAMES_DIR, `${frameTheme}.svg`);
+  // Overlay Frame theme (PNG transparent overlay only; frameless layouts skip)
+  if (theme) {
+    const framePngPath = path.join(FRAMES_DIR, `${theme}.png`);
+    const frameSvgPath = path.join(FRAMES_DIR, `${theme}.svg`);
     const frameFilePath = fs.existsSync(framePngPath) ? framePngPath : (fs.existsSync(frameSvgPath) ? frameSvgPath : null);
 
     if (frameFilePath) {

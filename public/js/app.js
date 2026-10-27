@@ -309,6 +309,24 @@ document.addEventListener('DOMContentLoaded', () => {
     .forEach(enableKeyboardClick);
 
   // --- SCREEN 2: LAYOUT SELECTION ---
+  // Frame follows layout: 3x2-grid -> Denim/Lace, 3-strip -> 3x1 strip,
+  // 2x2-grid & polaroid -> frameless (theme group hidden)
+  function syncThemeChips() {
+    const chips = document.querySelectorAll('.theme-chip');
+    const group = chips.length ? chips[0].closest('.control-group') : null;
+    let visible = 0;
+    chips.forEach(chip => {
+      const layouts = (chip.dataset.layouts || '').split(' ');
+      const show = layouts.includes(state.selectedLayout);
+      chip.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    if (group) group.style.display = visible ? '' : 'none';
+    const current = [...chips].find(c => c.dataset.theme === state.frameTheme && c.style.display !== 'none');
+    chips.forEach(c => c.classList.remove('selected'));
+    if (current) current.classList.add('selected');
+  }
+
   const layoutCards = document.querySelectorAll('.layout-card');
   layoutCards.forEach(card => {
     card.addEventListener('click', () => {
@@ -317,6 +335,16 @@ document.addEventListener('DOMContentLoaded', () => {
       state.selectedLayout = card.dataset.layout;
       state.targetShots = parseInt(card.dataset.shots, 10) || 3;
       state.photos = [];
+      if (state.selectedLayout === '3x2-grid') {
+        if (state.frameTheme !== 'diesnat-3x2_1' && state.frameTheme !== 'diesnat-3x2_2') {
+          state.frameTheme = 'diesnat-3x2_1';
+        }
+      } else if (state.selectedLayout === '3-strip') {
+        state.frameTheme = 'diesnat-3x1_1';
+      } else {
+        state.frameTheme = null;
+      }
+      syncThemeChips();
     });
   });
 
@@ -388,27 +416,27 @@ document.addEventListener('DOMContentLoaded', () => {
     stopSessionTimer();
     if (editorTimeoutNotice) editorTimeoutNotice.style.display = 'none';
     editor.loadSession(state.photos, state.selectedLayout);
+    // Editor resolves the layout-compatible theme (fix for stale frames
+    // leaking into other layouts); keep state in sync for the render POST
+    state.frameTheme = editor.frameTheme;
+    syncThemeChips();
     showScreen('editor');
   });
 
   // --- SCREEN 4: EDITOR ---
 
-  // Frame Theme Selection Chips; Diesnat frames have holes for the
-  // 6-slot sheet only, so other layouts fall back to Genesis
+  // Frame Theme Selection Chips; only layout-compatible chips are visible
+  // (syncThemeChips filters by layout), so clicks apply directly
   const themeChips = document.querySelectorAll('.theme-chip');
   themeChips.forEach(chip => {
     chip.addEventListener('click', () => {
-      let target = chip;
-      if (chip.dataset.theme.startsWith('diesnat-3x2') && state.selectedLayout !== '3x2-grid') {
-        const genesis = [...themeChips].find(t => t.dataset.theme === 'genesis-editorial');
-        if (genesis) target = genesis;
-      }
       themeChips.forEach(t => t.classList.remove('selected'));
-      target.classList.add('selected');
-      state.frameTheme = target.dataset.theme;
+      chip.classList.add('selected');
+      state.frameTheme = chip.dataset.theme;
       editor.setFrameTheme(state.frameTheme);
     });
   });
+  syncThemeChips();
 
   // Filter Chips
   const filterChips = document.querySelectorAll('.filter-chip');

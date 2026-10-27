@@ -28,8 +28,6 @@ class PhotoboothEditor {
       ];
     } else if (this.layout === '2x2-grid') {
       return [A, B, B, A];
-    } else if (this.layout === '4-strip') {
-      return [A, B, A, B];
     } else if (this.layout === '3-strip') {
       return [A, B, C];
     } else {
@@ -37,10 +35,30 @@ class PhotoboothEditor {
     }
   }
 
+  // Layout-compatible theme: mismatched combos fall back to the layout
+  // default; 2x2-grid & polaroid have no frame (null = photos only)
+  resolveThemeForLayout() {
+    if (this.layout === '3x2-grid') {
+      if (this.frameTheme !== 'diesnat-3x2_1' && this.frameTheme !== 'diesnat-3x2_2') {
+        this.frameTheme = 'diesnat-3x2_1';
+      }
+    } else if (this.layout === '3-strip') {
+      this.frameTheme = 'diesnat-3x1_1';
+    } else {
+      this.frameTheme = null;
+    }
+  }
+
   loadSession(photos, layout) {
     this.photos = photos;
     this.layout = layout || '3x2-grid';
-    if (this.frameTheme && !this.loadedFrameImage) {
+    this.resolveThemeForLayout();
+    if (!this.frameTheme) {
+      // Frameless layout: drop any previously loaded frame image
+      this.loadedFrameImage = null;
+      this._loadedTheme = null;
+      this.render();
+    } else if (!this.loadedFrameImage || this._loadedTheme !== this.frameTheme) {
       this.setFrameTheme(this.frameTheme);
     } else {
       this.render();
@@ -56,6 +74,7 @@ class PhotoboothEditor {
       img.onload = () => {
         if (token !== this._themeToken) return;
         this.loadedFrameImage = img;
+        this._loadedTheme = themeName;
         this.render();
       };
       img.onerror = () => {
@@ -65,11 +84,13 @@ class PhotoboothEditor {
         imgPng.onload = () => {
           if (token !== this._themeToken) return;
           this.loadedFrameImage = imgPng;
+          this._loadedTheme = themeName;
           this.render();
         };
         imgPng.onerror = () => {
           if (token !== this._themeToken) return;
           this.loadedFrameImage = null;
+          this._loadedTheme = null;
           this.render();
         };
         imgPng.src = `/assets/frames/${themeName}.png?v=${Date.now()}`;
@@ -77,6 +98,7 @@ class PhotoboothEditor {
       img.src = `/assets/frames/${themeName}.svg?v=${Date.now()}`;
     } else {
       this.loadedFrameImage = null;
+      this._loadedTheme = null;
       this.render();
     }
   }
@@ -213,15 +235,29 @@ class PhotoboothEditor {
       }
 
     } else if (this.layout === '3-strip') {
-      // 3 Portrait photos stacked vertically
-      const slotW = 340;
-      const slotH = 380; // Portrait slot
-      const marginX = 130;
-      const marginY = 40;
-      const gap = 25;
+      if (this.frameTheme === 'diesnat-3x1_1') {
+        // Rects lifted from the frame's transparent holes (pct + 0.6% pad),
+        // scanned from public/assets/frames/diesnat-3x1_1.png
+        const rects = [
+          [0.1361, 0.1108, 0.7125, 0.1796],
+          [0.1514, 0.3766, 0.7074, 0.1796],
+          [0.1514, 0.6424, 0.7125, 0.1779]
+        ];
+        for (let i = 0; i < Math.min(3, loadedImages.length); i++) {
+          const [rx, ry, rw, rh] = rects[i];
+          drawSlot(loadedImages[i], rx * w, ry * h, rw * w, rh * h);
+        }
+      } else {
+        // 3 Portrait photos stacked vertically (frameless fallback)
+        const slotW = 340;
+        const slotH = 380; // Portrait slot
+        const marginX = 130;
+        const marginY = 40;
+        const gap = 25;
 
-      for (let i = 0; i < Math.min(3, loadedImages.length); i++) {
-        drawSlot(loadedImages[i], marginX, marginY + i * (slotH + gap), slotW, slotH);
+        for (let i = 0; i < Math.min(3, loadedImages.length); i++) {
+          drawSlot(loadedImages[i], marginX, marginY + i * (slotH + gap), slotW, slotH);
+        }
       }
 
     } else if (this.layout === '2x2-grid') {

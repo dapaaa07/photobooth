@@ -451,6 +451,12 @@ p.subtitle {
   color: var(--accent);
 }
 
+/* editor countdown sits under the screen title, left-aligned */
+.editor-timer-badge {
+  align-self: flex-start;
+  margin: 12px 0 4px;
+}
+
 .camera-thumbnails-strip {
   display: flex;
   flex-wrap: wrap;

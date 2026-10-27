@@ -46,7 +46,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let resetTimer = null;
 
   // --- Session timer & recap player ---
-  const SESSION_MINUTES = { 1: 2, 2: 4, 3: 5 };
+  // Camera session budget by shot count: 1 foto = 90 dtk, 2 foto = 135 dtk, 3 foto = 180 dtk
+  const SESSION_SECONDS = { 1: 90, 2: 135, 3: 180 };
+  const EDITOR_SECONDS = 90;
   const RECAP_INTERVAL_MS = 850;
   const MAX_CAPTURES = 15;
   // Commissioning helper: /?sessionsecs=8 shortens the deadline for setup tests
@@ -64,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function getSessionDurationSeconds() {
     if (SESSION_SECONDS_OVERRIDE) return SESSION_SECONDS_OVERRIDE;
-    return (SESSION_MINUTES[state.targetShots] || 3) * 60;
+    return SESSION_SECONDS[state.targetShots] || 180;
   }
 
   function startSessionTimer() {
@@ -87,6 +89,50 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sessionTimer) {
       clearInterval(sessionTimer);
       sessionTimer = null;
+    }
+  }
+
+  // --- Editor countdown (90 dtk): auto-lanjut ke render saat habis ---
+  const editorTimerBadge = document.getElementById('editor-timer-badge');
+  const editorTimerText = document.getElementById('editor-timer-text');
+  let editorTimer = null;
+  let editorSecondsLeft = 0;
+
+  function updateEditorBadge() {
+    if (!editorTimerText) return;
+    const secs = Math.max(0, editorSecondsLeft);
+    const mm = String(Math.floor(secs / 60)).padStart(2, '0');
+    const ss = String(secs % 60).padStart(2, '0');
+    editorTimerText.textContent = mm + ':' + ss;
+    if (editorTimerBadge) {
+      editorTimerBadge.classList.toggle('low', secs <= 30);
+    }
+  }
+
+  function startEditorTimer() {
+    stopEditorTimer();
+    editorSecondsLeft = EDITOR_SECONDS;
+    updateEditorBadge();
+    editorTimer = setInterval(() => {
+      editorSecondsLeft--;
+      updateEditorBadge();
+
+      if (editorSecondsLeft > 0 && editorSecondsLeft <= 10) {
+        camera.playBeep(1000, 0.1);
+      }
+      if (editorSecondsLeft <= 0) {
+        stopEditorTimer();
+        // Waktu editor habis: lanjut otomatis seperti menekan Lanjut
+        const btnSave = document.getElementById('btn-save-editor');
+        if (btnSave && !btnSave.disabled) btnSave.click();
+      }
+    }, 1000);
+  }
+
+  function stopEditorTimer() {
+    if (editorTimer) {
+      clearInterval(editorTimer);
+      editorTimer = null;
     }
   }
 
@@ -175,6 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Lifecycle actions per screen
     if (screenId === 'camera') {
+      stopEditorTimer();
       camera.startCamera();
       resetCameraSessionUI();
       // Crop guide depends on layout+theme and on live video dims; refresh
@@ -187,8 +234,11 @@ document.addEventListener('DOMContentLoaded', () => {
           camera.updateCropGuideFor(state.selectedLayout, state.frameTheme);
         });
       }
+    } else if (screenId === 'editor') {
+      startEditorTimer();
     } else {
       camera.stopCamera();
+      stopEditorTimer();
     }
   }
 
@@ -545,7 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const qrContainer = document.getElementById('qr-container');
     if (qrContainer) qrContainer.classList.remove('qr-hidden');
 
-    let secondsLeft = 50;
+    let secondsLeft = 40;
     const counterEl = document.getElementById('reset-counter');
     counterEl.textContent = secondsLeft;
 
@@ -564,6 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function resetToWelcomeScreen() {
     if (resetTimer) clearInterval(resetTimer);
     stopSessionTimer();
+    stopEditorTimer();
     recap.stop();
     state.photos = [];
     state.captures = [];

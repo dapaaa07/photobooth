@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1700" width="1200" height="1700">
+  <!-- Soft Lavender Outer Border -->
+  <rect x="15" y="15" width="1170" height="1670" fill="none" stroke="#c084fc" stroke-width="8" rx="28"/>
+  
+  <!-- Corner Sparkles & Korean Hearts -->
+  <g fill="#a855f7">
+    <!-- Top Left Starburst -->
+    <path d="M 60 40 L 68 56 L 84 64 L 68 72 L 60 88 L 52 72 L 36 64 L 52 56 Z"/>
+    <!-- Top Right Starburst -->
+    <path d="M 1140 40 L 1148 56 L 1164 64 L 1148 72 L 1140 88 L 1132 72 L 1116 64 L 1132 56 Z"/>
+  </g>
+
+  <!-- Cute Cherry Blossoms -->
+  <g fill="#f472b6" opacity="0.9">
+    <circle cx="90" cy="1620" r="14"/>
+    <circle cx="110" cy="1610" r="12"/>
+    <circle cx="105" cy="1635" r="12"/>
+    <circle cx="1110" cy="1620" r="14"/>
+    <circle cx="1090" cy="1610" r="12"/>
+    <circle cx="1095" cy="1635" r="12"/>
+  </g>
+
+  <text x="600" y="1655" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="26" fill="#9333ea" text-anchor="middle" letter-spacing="4">포토부스 ✦ KOREAN PHOTOBOOTH ✦ 추억</text>
+</svg>

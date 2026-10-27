@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 5400" width="2400" height="5400">
+  <defs>
+    <style>
+      .guide-text { font-family: 'Helvetica Neue', Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- LAYER 1: CANVAS BOUNDARY -->
+  <rect id="canvas-boundary" width="2400" height="5400" fill="#f8fafc" stroke="#cbd5e1" stroke-width="4"/>
+
+  <!-- LAYER 2: HEADER BANNER (PANDUAN UKURAN) -->
+  <rect x="80" y="24" width="2240" height="76" rx="16" fill="#0f172a" />
+  <text x="1200" y="72" class="guide-text" font-size="36" font-weight="bold" fill="#38bdf8" text-anchor="middle" letter-spacing="2">
+    TEMPLATE DESAIN FREMIO: CLASSIC 3-STRIP VERTICAL (3 FOTO) • UKURAN KANVAS: 2400 × 5400 PX
+  </text>
+
+  <!-- LAYER 3: PHOTO SLOTS (AREA FOTO YANG JANGAN DITUTUP GAMBAR SOLID) -->
+  
+      <!-- SLOT #1 -->
+      <g id="slot-1">
+        <!-- Transparent cutout area indicator -->
+        <rect x="520" y="160" width="1360" height="1520" rx="20" fill="#38bdf8" fill-opacity="0.12" stroke="#0284c7" stroke-width="6" stroke-dasharray="20 12"/>
+        
+        <!-- Slot Center Label -->
+        <circle cx="1200" cy="880" r="50" fill="#0284c7" />
+        <text x="1200" y="896" font-family="Arial, sans-serif" font-size="44" font-weight="bold" fill="#ffffff" text-anchor="middle">1</text>
+        <text x="1200" y="970" font-family="Arial, sans-serif" font-size="38" font-weight="bold" fill="#0369a1" text-anchor="middle">LUBANG FOTO #1 (TRANSPARAN)</text>
+        <text x="1200" y="1025" font-family="monospace" font-size="32" font-weight="600" fill="#64748b" text-anchor="middle">1360 × 1520 px</text>
+      </g>
+    
+
+      <!-- SLOT #2 -->
+      <g id="slot-2">
+        <!-- Transparent cutout area indicator -->
+        <rect x="520" y="1780" width="1360" height="1520" rx="20" fill="#38bdf8" fill-opacity="0.12" stroke="#0284c7" stroke-width="6" stroke-dasharray="20 12"/>
+        
+        <!-- Slot Center Label -->
+        <circle cx="1200" cy="2500" r="50" fill="#0284c7" />
+        <text x="1200" y="2516" font-family="Arial, sans-serif" font-size="44" font-weight="bold" fill="#ffffff" text-anchor="middle">2</text>
+        <text x="1200" y="2590" font-family="Arial, sans-serif" font-size="38" font-weight="bold" fill="#0369a1" text-anchor="middle">LUBANG FOTO #2 (TRANSPARAN)</text>
+        <text x="1200" y="2645" font-family="monospace" font-size="32" font-weight="600" fill="#64748b" text-anchor="middle">1360 × 1520 px</text>
+      </g>
+    
+
+      <!-- SLOT #3 -->
+      <g id="slot-3">
+        <!-- Transparent cutout area indicator -->
+        <rect x="520" y="3400" width="1360" height="1520" rx="20" fill="#38bdf8" fill-opacity="0.12" stroke="#0284c7" stroke-width="6" stroke-dasharray="20 12"/>
+        
+        <!-- Slot Center Label -->
+        <circle cx="1200" cy="4120" r="50" fill="#0284c7" />
+        <text x="1200" y="4136" font-family="Arial, sans-serif" font-size="44" font-weight="bold" fill="#ffffff" text-anchor="middle">3</text>
+        <text x="1200" y="4210" font-family="Arial, sans-serif" font-size="38" font-weight="bold" fill="#0369a1" text-anchor="middle">LUBANG FOTO #3 (TRANSPARAN)</text>
+        <text x="1200" y="4265" font-family="monospace" font-size="32" font-weight="600" fill="#64748b" text-anchor="middle">1360 × 1520 px</text>
+      </g>
+    
+
+  <!-- LAYER 4: SAFE DESIGN AREA HINT -->
+  <rect x="60" y="5320" width="2280" height="60" rx="12" fill="#e2e8f0"/>
+  <text x="1200" y="5360" class="guide-text" font-size="28" font-weight="600" fill="#475569" text-anchor="middle">
+    💡 TIPS: Letakkan ornamen frame, stiker, teks branding, &amp; hiasan di luar atau di sekeliling kotak lubang foto.
+  </text>
+</svg>

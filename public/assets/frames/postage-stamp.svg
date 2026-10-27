@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1700" width="1200" height="1700">
+  <!-- Airmail Border Stripes (Top & Bottom) -->
+  <g fill="none" stroke-width="16">
+    <path d="M 0 10 L 1200 10" stroke="#ef4444" stroke-dasharray="30 30"/>
+    <path d="M 0 1690 L 1200 1690" stroke="#3b82f6" stroke-dasharray="30 30"/>
+  </g>
+
+  <!-- Left & Right Stamp Border -->
+  <rect x="25" y="25" width="1150" height="1650" fill="none" stroke="#64748b" stroke-width="6" rx="12" stroke-dasharray="15 10"/>
+
+  <!-- Vintage Postmark Stamp Badge Top Right -->
+  <g transform="translate(1000, 50)">
+    <circle cx="60" cy="60" r="50" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="6 4"/>
+    <circle cx="60" cy="60" r="40" fill="none" stroke="#ef4444" stroke-width="2"/>
+    <path d="M 10 60 L 110 60" stroke="#ef4444" stroke-width="2"/>
+    <text x="60" y="45" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="12" fill="#ef4444" text-anchor="middle">AIR MAIL</text>
+    <text x="60" y="80" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="14" fill="#ef4444" text-anchor="middle">PASSPORT</text>
+  </g>
+
+  <text x="600" y="1655" font-family="monospace" font-weight="700" font-size="24" fill="#475569" text-anchor="middle" letter-spacing="4">✈️ POSTAGE STAMP MEMORIES • AIRMAIL PARCEL</text>
+</svg>

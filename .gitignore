@@ -1,0 +1,23 @@
+# kredensial & material privat
+.env
+dapa-drive.json
+google-credentials.json
+*.pem
+ssl/
+
+# dependensi & data runtime
+node_modules/
+storage/
+
+# backup lokal
+.backup-*/
+
+# aset sumber desain di root (tidak dirujuk aplikasi; frame final ada di public/assets/frames/)
+DIESNAT.png
+DIESNAT-no-bg.png
+test_photobooth_success.png
+
+# noise OS/mac
+.DS_Store
+Thumbs.db
+npm-debug.log*

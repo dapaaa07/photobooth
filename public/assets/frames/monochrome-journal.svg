@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1700" width="1200" height="1700">
+  <!-- Journal Masking Tape at Corners -->
+  <g fill="#e2e8f0" opacity="0.85" stroke="#cbd5e1" stroke-width="2">
+    <!-- Top Left Tape -->
+    <polygon points="10,50 60,10 100,50 50,90"/>
+    <!-- Top Right Tape -->
+    <polygon points="1100,50 1140,10 1190,50 1150,90"/>
+    <!-- Bottom Left Tape -->
+    <polygon points="10,1650 60,1610 100,1650 50,1690"/>
+    <!-- Bottom Right Tape -->
+    <polygon points="1100,1650 1140,1610 1190,1650 1150,1690"/>
+  </g>
+
+  <!-- Minimalist Hand-Drawn Frame Lines -->
+  <rect x="35" y="35" width="1130" height="1630" fill="none" stroke="#334155" stroke-width="4" rx="12" stroke-dasharray="25 8"/>
+
+  <text x="600" y="1655" font-family="'Plus Jakarta Sans', sans-serif" font-weight="600" font-size="24" fill="#334155" text-anchor="middle" letter-spacing="3">✦ JOURNAL &amp; SCRAPBOOK MEMORIES ✦</text>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1700" width="1200" height="1700">
+  <!-- Double Heart Border -->
+  <rect x="16" y="16" width="1168" height="1668" fill="none" stroke="#f43f5e" stroke-width="8" rx="24"/>
+  <rect x="28" y="28" width="1144" height="1644" fill="none" stroke="#fda4af" stroke-width="3" rx="18"/>
+
+  <!-- Top Center Linked Hearts -->
+  <g fill="#f43f5e">
+    <path d="M 600 40 C 600 25, 585 15, 575 25 C 565 15, 550 25, 550 40 C 550 60, 575 75, 575 75 C 575 75, 600 60, 600 40 Z" transform="translate(10, 10) scale(1.2)"/>
+    <path d="M 600 40 C 600 25, 585 15, 575 25 C 565 15, 550 25, 550 40 C 550 60, 575 75, 575 75 C 575 75, 600 60, 600 40 Z" transform="translate(-35, 10) scale(1.2)"/>
+  </g>
+
+  <!-- Floating Mini Hearts -->
+  <g fill="#fb7185" opacity="0.8">
+    <path d="M 60 70 C 60 50, 40 40, 30 55 C 20 40, 0 50, 0 70 C 0 95, 30 115, 30 115 C 30 115, 60 95, 60 70 Z" transform="translate(30, 1580) scale(0.5)"/>
+    <path d="M 60 70 C 60 50, 40 40, 30 55 C 20 40, 0 50, 0 70 C 0 95, 30 115, 30 115 C 30 115, 60 95, 60 70 Z" transform="translate(1110, 1580) scale(0.5)"/>
+  </g>
+
+  <text x="600" y="1655" font-family="'Dancing Script', cursive" font-weight="700" font-size="34" fill="#e11d48" text-anchor="middle" letter-spacing="2">Forever &amp; Always 💖 Love Edition</text>
+</svg>

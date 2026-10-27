@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="color-scheme" content="light">
+  <title>DIESNATALIS HIMATIKOM 2026</title>
+  <link rel="stylesheet" href="/css/style.css?v=13">
+</head>
+<body>
+
+  <div id="app">
+
+    <!-- Screen 1: Welcome -->
+    <div id="screen-welcome" class="screen active">
+      <div class="welcome-split">
+        <div class="welcome-copy">
+          <h1 class="title-large">Abadikan Momen Diesnatalis</h1>
+          <p class="subtitle">Sentuh layar untuk memulai sesi photobooth perayaan Dies Natalis HIMATIKOM 2026.</p>
+          <button id="btn-start" class="btn-primary">
+            <span>Mulai Foto Sekarang</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <p class="welcome-meta">5 Layout / 13 Tema / 6 Filter / QR Drive</p>
+        </div>
+        <div class="welcome-visual" aria-hidden="true">
+          <svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+            <circle cx="12" cy="13" r="3"/>
+          </svg>
+          <span class="welcome-visual-label">Photobooth<br>Kiosk<br>2026</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Layout Selection -->
+    <div id="screen-layout" class="screen">
+      <div class="screen-bar">
+        <span>Himatikom 2026 / Photobooth</span>
+        <span>02 / Pilih Layout</span>
+      </div>
+      <h1 class="title-large">Pilih Layout Foto</h1>
+      <p class="subtitle">Pilih layout potret, lalu ambil foto sesuai jumlahnya.</p>
+
+      <div class="layout-list">
+        <div class="layout-card selected recommended-card" data-layout="3x2-grid" data-shots="3">
+          <span class="layout-index">01</span>
+          <div class="layout-preview-box" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px;">
+            <div class="mini-photo-slot" style="width:100%; height:19px;"></div>
+            <div class="mini-photo-slot" style="width:100%; height:19px;"></div>
+            <div class="mini-photo-slot" style="width:100%; height:19px;"></div>
+            <div class="mini-photo-slot" style="width:100%; height:19px;"></div>
+            <div class="mini-photo-slot" style="width:100%; height:19px;"></div>
+            <div class="mini-photo-slot" style="width:100%; height:19px;"></div>
+          </div>
+          <div class="layout-info">
+            <h3>3x2 Grid Portrait</h3>
+            <p>3 foto, 6 slot, pola berulang</p>
+            <span class="badge-recommended">Rekomendasi</span>
+          </div>
+          <span class="layout-shots">3 Foto</span>
+        </div>
+
+        <div class="layout-card" data-layout="3-strip" data-shots="3">
+          <span class="layout-index">02</span>
+          <div class="layout-preview-box" style="display: flex; flex-direction: column; justify-content: center; gap: 3px;">
+            <div class="mini-photo-slot" style="width:100%; height:19px;"></div>
+            <div class="mini-photo-slot" style="width:100%; height:19px;"></div>
+            <div class="mini-photo-slot" style="width:100%; height:19px;"></div>
+          </div>
+          <div class="layout-info">
+            <h3>Classic 3-Strip</h3>
+            <p>3 foto, 3 strip vertikal</p>
+          </div>
+          <span class="layout-shots">3 Foto</span>
+        </div>
+
+        <div class="layout-card" data-layout="2x2-grid" data-shots="2">
+          <span class="layout-index">03</span>
+          <div class="layout-preview-box" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px;">
+            <div class="mini-photo-slot" style="width:100%; height:30px;"></div>
+            <div class="mini-photo-slot" style="width:100%; height:30px;"></div>
+            <div class="mini-photo-slot" style="width:100%; height:30px;"></div>
+            <div class="mini-photo-slot" style="width:100%; height:30px;"></div>
+          </div>
+          <div class="layout-info">
+            <h3>2x2 Grid Portrait</h3>
+            <p>2 foto, 4 slot</p>
+          </div>
+          <span class="layout-shots">2 Foto</span>
+        </div>
+
+        <div class="layout-card" data-layout="4-strip" data-shots="2">
+          <span class="layout-index">04</span>
+          <div class="layout-preview-box" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px;">
+            <div class="mini-photo-slot" style="width:100%; height:30px;"></div>
+            <div class="mini-photo-slot" style="width:100%; height:30px;"></div>
+            <div class="mini-photo-slot" style="width:100%; height:30px;"></div>
+            <div class="mini-photo-slot" style="width:100%; height:30px;"></div>
+          </div>
+          <div class="layout-info">
+            <h3>4-Photo Strip</h3>
+            <p>2 foto, 4 slot strip</p>
+          </div>
+          <span class="layout-shots">2 Foto</span>
+        </div>
+
+        <div class="layout-card" data-layout="polaroid" data-shots="1">
+          <span class="layout-index">05</span>
+          <div class="layout-preview-box">
+            <div class="mini-photo-slot" style="width:100%; height:63px;"></div>
+          </div>
+          <div class="layout-info">
+            <h3>Polaroid Portrait</h3>
+            <p>1 foto, bingkai vintage</p>
+          </div>
+          <span class="layout-shots">1 Foto</span>
+        </div>
+      </div>
+
+      <div class="btn-group screen-actions">
+        <button id="btn-back-layout" class="btn-secondary">Kembali</button>
+        <button id="btn-next-layout" class="btn-primary">Lanjut ke Kamera</button>
+      </div>
+    </div>
+
+    <!-- Screen 3: Camera Capture with Step-by-Step Retake -->
+    <div id="screen-camera" class="screen">
+      <div class="screen-bar">
+        <span>Himatikom 2026 / Photobooth</span>
+        <span>03 / Kamera</span>
+      </div>
+
+      <div class="camera-layout">
+        <div class="camera-container">
+          <div id="camera-source-badge" class="camera-source-badge">
+            <span></span>
+            <span>Webcam Tablet (Auto Fallback)</span>
+          </div>
+          <video id="video-feed" autoplay playsinline></video>
+          <div id="flash-overlay"></div>
+          <div id="countdown-num" class="countdown-overlay">3</div>
+        </div>
+
+        <div class="camera-panel">
+          <div id="session-timer-badge" class="session-timer-badge">
+            <span class="timer-label">Sisa Waktu</span>
+            <strong id="session-timer-text">--:--</strong>
+          </div>
+
+          <div id="camera-thumbnails-strip" class="camera-thumbnails-strip"></div>
+
+          <div class="camera-status-bar">
+            <div class="shot-counter-badge">
+              Status: <span id="camera-status-text">Bersiap...</span>
+            </div>
+            <div class="btn-group">
+              <button id="btn-snap-start" class="btn-primary">
+                <span id="snap-btn-text">Ambil Foto 1</span>
+              </button>
+              <button id="btn-snap-retake-current" class="btn-secondary" style="display:none;">
+                <span>Ulang Foto Ini</span>
+              </button>
+              <button id="btn-camera-next" class="btn-primary" style="display:none;">
+                <span>Lanjut ke Editor</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Photo Editor -->
+    <div id="screen-editor" class="screen">
+      <div class="screen-bar">
+        <span>Himatikom 2026 / Photobooth</span>
+        <span>04 / Editor</span>
+      </div>
+      <h1 class="title-large">Kustomisasi Foto</h1>
+
+      <div id="editor-timeout-notice" class="editor-notice" style="display: none;">
+        Waktu Habis. Slot yang tidak sempat difoto digambar hitam dan tidak dapat diulang.
+      </div>
+
+      <div class="editor-layout">
+        <div class="canvas-preview-container">
+          <canvas id="preview-canvas"></canvas>
+        </div>
+
+        <div class="editor-controls">
+          <div class="control-group">
+            <label>Tema Desain Frame</label>
+            <div class="option-row">
+              <div class="theme-chip selected" data-theme="genesis-editorial">Genesis Editorial</div>
+              <div class="theme-chip" data-theme="himatikom-2026">Himatikom 2026</div>
+              <div class="theme-chip" data-theme="default">Minimal Clean</div>
+              <div class="theme-chip" data-theme="vintage-film">Vintage Film</div>
+              <div class="theme-chip" data-theme="y2k-cyber">Y2K Cyber</div>
+              <div class="theme-chip" data-theme="pastel-cute">Pastel Cute</div>
+              <div class="theme-chip" data-theme="party-birthday">Party Fest</div>
+              <div class="theme-chip" data-theme="korean-wave">Korean Wave</div>
+              <div class="theme-chip" data-theme="retro-comic">Retro Comic</div>
+              <div class="theme-chip" data-theme="love-couple">Love &amp; Couple</div>
+              <div class="theme-chip" data-theme="postage-stamp">Postage Stamp</div>
+              <div class="theme-chip" data-theme="dark-synth">Dark Synth</div>
+              <div class="theme-chip" data-theme="monochrome-journal">Journal Scrapbook</div>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Warna Bingkai Base</label>
+            <div class="option-row">
+              <div class="color-swatch selected" data-color="#ffffff" style="background: #ffffff;" title="White"></div>
+              <div class="color-swatch" data-color="#18181b" style="background: #18181b;" title="Dark Neon"></div>
+              <div class="color-swatch" data-color="#f472b6" style="background: #f472b6;" title="Pastel Pink"></div>
+              <div class="color-swatch" data-color="#fef08a" style="background: #fef08a;" title="Warm Cream"></div>
+              <div class="color-swatch" data-color="#38bdf8" style="background: #38bdf8;" title="Cyber Blue"></div>
+              <div class="color-swatch" data-color="#a7f3d0" style="background: #a7f3d0;" title="Pastel Mint"></div>
+              <div class="color-swatch" data-color="#ddd6fe" style="background: #ddd6fe;" title="Pastel Purple"></div>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Filter Warna Foto</label>
+            <div class="option-row">
+              <div class="filter-chip selected" data-filter="normal">Normal</div>
+              <div class="filter-chip" data-filter="bw">B &amp; W</div>
+              <div class="filter-chip" data-filter="vintage">Vintage</div>
+              <div class="filter-chip" data-filter="vivid">Vivid</div>
+              <div class="filter-chip" data-filter="cyber">Cyber</div>
+              <div class="filter-chip" data-filter="sepia">Sepia</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="btn-group screen-actions">
+        <button id="btn-save-editor" class="btn-primary">Lanjut</button>
+      </div>
+    </div>
+
+    <!-- Screen 5: Success & Google Drive QR Code -->
+    <div id="screen-success" class="screen">
+      <div class="screen-bar">
+        <span>Himatikom 2026 / Photobooth</span>
+        <span>05 / Selesai</span>
+      </div>
+
+      <div class="success-icon-row"><div class="success-icon-circle">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div></div>
+
+      <h1 class="title-large">Foto Berhasil Disimpan</h1>
+      <p id="drive-status-msg" class="subtitle">Foto kamu telah otomatis tersimpan di Google Drive Diesnatalis Himatikom.</p>
+
+      <div class="success-panels">
+        <div class="rekap-panel">
+          <span class="rekap-label">Rekap Sesi Foto</span>
+          <canvas id="rekap-canvas" width="240" height="180"></canvas>
+        </div>
+
+        <div id="qr-container" class="qr-hidden">
+          <img id="drive-qr-img" src="" alt="QR Code Google Drive">
+          <span class="qr-caption">Scan QR untuk akses dan unduh foto</span>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button id="btn-finish-now" class="btn-primary">Selesai &amp; Foto Lagi</button>
+      </div>
+
+      <div class="reset-timer-badge">
+        Kembali ke layar utama dalam <strong id="reset-counter">30</strong> detik
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Client JavaScript Modules -->
+  <script src="/js/camera.js?v=19"></script>
+  <script src="/js/editor.js?v=19"></script>
+  <script src="/js/recap.js?v=19"></script>
+  <script src="/js/virtualKeyboard.js?v=19"></script>
+  <script src="/js/app.js?v=20"></script>
+</body>
+</html>

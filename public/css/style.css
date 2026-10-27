@@ -1,0 +1,989 @@
+/* ============================================================
+   Photobooth Kiosk - "Ruang Cetak Studio"
+   Direction recorded in DESIGN.md (dials ENERGY 2 / RHYTHM 2 / MOTION 2).
+   Mechanism hooks preserved for app.js: .screen.active, .selected,
+   .low, .qr-hidden, .pop, .flash.
+   ============================================================ */
+
+:root {
+  /* palette: paper + ink cores, one studio-red accent (R-29) */
+  --paper: #F6F2EA;
+  --surface: #FFFFFF;
+  --ink: #221D15;
+  --grey: #6E675C;
+  --line: #E5DED0;
+  --slot: #E9E1D3;
+  --accent: #BC3F1E;
+  --accent-deep: #9B2F14;
+
+  --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', 'Times New Roman', serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --u: 8px;
+  --r-s: 6px;
+  --r-m: 10px;
+  --r-l: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+#app {
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* ------------------------------------------------ screens --- */
+
+.screen {
+  display: none;
+  height: 100%;
+  flex-direction: column;
+  padding: clamp(16px, 3vh, 30px) clamp(20px, 4.5vw, 52px);
+  overflow: hidden;
+}
+
+.screen.active {
+  display: flex;
+}
+
+#screen-welcome,
+#screen-success {
+  overflow-y: auto;
+}
+
+.screen-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
+  margin-bottom: clamp(16px, 3vh, 26px);
+  border-bottom: 1px solid var(--line);
+  /* step marker: carries which screen you are on, hence the small caps */
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--grey);
+  flex-shrink: 0;
+}
+
+.screen-bar span:last-child {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* centered screens would shrink the step bar; it spans full width */
+#screen-success .screen-bar {
+  align-self: stretch;
+  text-align: left;
+}
+
+/* --------------------------------------------------- type --- */
+
+h1.title-large {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.9rem, 3.6vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+}
+
+p.subtitle {
+  font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+  line-height: 1.55;
+  color: var(--grey);
+  max-width: 60ch;
+  margin: 0 0 clamp(14px, 2.5vh, 22px);
+}
+
+/* ------------------------------------------------ buttons --- */
+
+.btn-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-group > button {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 14px 28px;
+  background: var(--accent);
+  color: #FBF7F0;
+  border: 0;
+  border-radius: var(--r-m);
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background-color 0.16s ease, transform 0.16s ease;
+}
+
+.btn-primary:hover {
+  background: var(--accent-deep);
+}
+
+.btn-primary:active {
+  transform: scale(0.985);
+}
+
+.btn-primary:disabled {
+  background: #DDD5C6;
+  color: #8F887A;
+  cursor: default;
+  transform: none;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 14px 24px;
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r-m);
+  font-size: 15px;
+  font-weight: 600;
+  transition: background-color 0.16s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(34, 29, 21, 0.07);
+}
+
+.btn-secondary:active {
+  transform: scale(0.985);
+}
+
+.screen-actions {
+  margin-top: auto;
+  padding-top: 18px;
+  flex-shrink: 0;
+}
+
+/* ------------------------------------------- screen 1: welcome --- */
+
+.welcome-split {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  align-items: center;
+  gap: clamp(28px, 6vw, 76px);
+  min-height: 0;
+}
+
+.welcome-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.welcome-copy .btn-primary {
+  padding: 16px 34px;
+  font-size: 16.5px;
+}
+
+.welcome-meta {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--grey);
+  margin: 2px 0 0;
+}
+
+/* hero card: the only illustration on screen; the camera glyph is the
+   product itself, so a generic-but-relevant mark with a written reason */
+.welcome-visual {
+  justify-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  padding: clamp(36px, 5vw, 64px) clamp(30px, 4vw, 56px);
+}
+
+.welcome-visual svg {
+  color: var(--ink);
+  stroke: currentColor;
+  width: 112px;
+  height: 112px;
+}
+
+.welcome-visual-label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--grey);
+}
+
+/* ------------------------------------------- screen 2: layout --- */
+
+.layout-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 2px 4px 8px;
+}
+
+.layout-card {
+  display: grid;
+  grid-template-columns: 3.2ch minmax(96px, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+.layout-index {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--grey);
+}
+
+.layout-preview-box {
+  width: 96px;
+  height: 104px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  padding: 7px;
+}
+
+.mini-photo-slot {
+  background: var(--slot);
+  box-shadow: inset 0 0 0 1px rgba(34, 29, 21, 0.08);
+}
+
+.layout-info h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 3px;
+}
+
+.layout-info p {
+  font-size: 13.5px;
+  color: var(--grey);
+  margin: 0 0 6px;
+}
+
+/* real recommendation the vendor set, so the label stays but stays quiet */
+.badge-recommended {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.layout-shots {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  padding: 7px 11px;
+  white-space: nowrap;
+}
+
+.layout-card.selected {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.layout-card.selected .layout-shots {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #FBF7F0;
+}
+
+/* ------------------------------------------------ screen 3: camera --- */
+
+.camera-layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  gap: clamp(16px, 2.4vw, 30px);
+}
+
+.camera-container {
+  position: relative;
+  min-height: 0;
+  background: var(--ink);
+  border-radius: var(--r-l);
+  overflow: hidden;
+}
+
+#video-feed {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-source-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(24, 19, 13, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--r-s);
+  padding: 7px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #EDE7DA;
+}
+
+/* the dot marks the real camera-source state, so it gets no glow */
+.camera-source-badge span:first-child {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #F3EEE3;
+}
+
+.camera-source-badge strong {
+  font-weight: 700;
+}
+
+.camera-panel {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+.session-timer-badge {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  padding: 13px 16px;
+  flex-shrink: 0;
+}
+
+.session-timer-badge .timer-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+.session-timer-badge strong {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* low time is one of the accent's two jobs: urgent attention */
+.session-timer-badge.low {
+  border-color: var(--accent);
+}
+
+.session-timer-badge.low .timer-label,
+.session-timer-badge.low strong {
+  color: var(--accent);
+}
+
+.camera-thumbnails-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.thumb-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  padding: 6px;
+}
+
+.thumb-box img {
+  display: block;
+  width: 74px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: var(--slot);
+}
+
+.thumb-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--grey);
+  text-align: center;
+}
+
+.btn-thumb-retake {
+  width: 100%;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 7px 6px;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  transition: background-color 0.16s ease;
+}
+
+.btn-thumb-retake:disabled {
+  color: #A79E8E;
+  border-color: #EBE4D6;
+  background: #F7F2E8;
+  cursor: default;
+}
+
+.camera-status-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.shot-counter-badge {
+  font-size: 14px;
+  color: var(--grey);
+}
+
+.shot-counter-badge #camera-status-text {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.camera-status-bar .btn-group {
+  flex-wrap: nowrap;
+}
+
+.camera-status-bar .btn-primary,
+.camera-status-bar .btn-secondary {
+  min-height: 48px;
+  padding: 12px 18px;
+  font-size: 14.5px;
+}
+
+/* ------------------------------------------------ overlays --- */
+
+#flash-overlay {
+  position: absolute;
+  inset: 0;
+  background: #FFFFFF;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 400;
+}
+
+/* capture feedback: one white flash per shot, not a loop */
+#flash-overlay.flash {
+  animation: flash-hit 0.5s ease-out forwards;
+}
+
+@keyframes flash-hit {
+  0% { opacity: 0.92; }
+  100% { opacity: 0; }
+}
+
+.countdown-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(5.5rem, 16vw, 9rem);
+  line-height: 1;
+  color: var(--paper);
+  text-shadow: 0 2px 26px rgba(20, 16, 10, 0.6);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 300;
+}
+
+.countdown-overlay.pop {
+  animation: countdown-hit 0.85s ease-out forwards;
+}
+
+@keyframes countdown-hit {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+/* ------------------------------------------------ screen 4: editor --- */
+
+#screen-editor {
+  overflow: hidden;
+}
+
+#screen-editor .title-large {
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+}
+
+.editor-notice {
+  width: 100%;
+  border: 1.5px solid var(--accent);
+  background: #FAF1EB;
+  color: var(--ink);
+  border-radius: var(--r-m);
+  padding: 11px 16px;
+  font-size: 14px;
+  line-height: 1.45;
+  margin: 2px 0 12px;
+  flex-shrink: 0;
+}
+
+.editor-layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+  gap: 22px;
+  margin-top: 2px;
+}
+
+/* the preview is the artwork node of this screen, so it is one of the
+   two elevated surfaces named in DESIGN.md */
+.canvas-preview-container {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  padding: clamp(14px, 2vw, 26px);
+  box-shadow: 0 14px 34px rgba(34, 29, 21, 0.08);
+}
+
+#preview-canvas {
+  max-width: 100%;
+  max-height: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.editor-controls {
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 4px 10px 4px 2px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.control-group label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.option-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* selected control fills with ink: selection here reads without the accent */
+.theme-chip,
+.filter-chip {
+  cursor: pointer;
+  user-select: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--grey);
+  padding: 9px 14px;
+  border-radius: var(--r-s);
+  font-size: 13px;
+  font-weight: 600;
+  transition: border-color 0.16s ease, background-color 0.16s ease, color 0.16s ease;
+}
+
+.theme-chip:hover,
+.filter-chip:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.theme-chip.selected,
+.filter-chip.selected,
+.filter-chip.selected:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.color-swatch {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(34, 29, 21, 0.18);
+  border-radius: var(--r-s);
+  cursor: pointer;
+  transition: box-shadow 0.16s ease;
+}
+
+.color-swatch.selected {
+  box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--accent);
+}
+
+/* ---------------------------------------------- screen 5: success --- */
+
+#screen-success {
+  align-items: center;
+  text-align: center;
+  justify-content: flex-start;
+}
+
+.success-icon-row {
+  margin: auto 0 10px;
+}
+
+/* the single circle in the system: it holds the real confirmation state */
+.success-icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--accent);
+  background: #FAF1EB;
+  color: var(--accent);
+}
+
+.success-icon-circle svg {
+  display: block;
+  stroke: currentColor;
+}
+
+#screen-success p.subtitle {
+  margin-bottom: 20px;
+}
+
+/* recap and QR sit side by side so the success screen fits without scroll */
+.success-panels {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: stretch;
+  justify-content: center;
+  gap: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.rekap-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  padding: 14px 14px 12px;
+}
+
+.rekap-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+#rekap-canvas {
+  display: block;
+  background: #14110B;
+  border-radius: 8px;
+}
+
+/* second elevated surface: the QR is the deliverable guests walk away with */
+#qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  padding: 18px 22px 16px;
+  box-shadow: 0 14px 34px rgba(34, 29, 21, 0.08);
+}
+
+/* revealed by app.js after the recap's first pass */
+#qr-container.qr-hidden {
+  display: none;
+}
+
+#drive-qr-img {
+  display: block;
+  width: 210px;
+  height: 210px;
+  border-radius: 8px;
+}
+
+.qr-caption {
+  font-size: 13px;
+  color: var(--grey);
+}
+
+#screen-success .btn-group {
+  width: 100%;
+  max-width: 440px;
+  margin-bottom: 10px;
+}
+
+.reset-timer-badge {
+  font-size: 13.5px;
+  color: var(--grey);
+  padding-bottom: 10px;
+  margin-bottom: auto;
+}
+
+#reset-counter {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05em;
+  color: var(--ink);
+}
+
+/* ---------------------------------------- virtual keyboard (dormant path) --- */
+
+.vk-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.vk-key {
+  min-width: 40px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.vk-key.wide {
+  flex: 1;
+}
+
+.vk-key.domain-key {
+  font-size: 12px;
+  padding: 8px 8px;
+}
+
+/* ------------------------------------------------ hover refinement --- */
+
+@media (hover: hover) {
+  .layout-card:hover {
+    background: #FCFAF5;
+    border-color: #D9D1C0;
+  }
+
+  .btn-thumb-retake:not(:disabled):hover {
+    background: rgba(34, 29, 21, 0.06);
+  }
+
+  .color-swatch:hover {
+    box-shadow: 0 0 0 1px rgba(34, 29, 21, 0.25);
+  }
+}
+
+/* ------------------------------------------------ responsive --- */
+
+@media (max-width: 900px) {
+  .welcome-split {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+
+  .welcome-copy {
+    padding-top: 8px;
+  }
+
+  .welcome-visual {
+    display: none;
+  }
+
+  .camera-layout {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .camera-container {
+    max-height: 44vh;
+    flex-shrink: 0;
+  }
+
+  .editor-layout {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .canvas-preview-container {
+    max-height: 46vh;
+    flex-shrink: 0;
+  }
+
+  .editor-controls {
+    overflow-y: visible;
+  }
+
+  .success-panels {
+    grid-template-columns: minmax(0, 300px);
+  }
+}
+
+@media (max-width: 560px) {
+  .screen {
+    padding: 14px 16px;
+  }
+
+  .screen-bar {
+    font-size: 10.5px;
+    margin-bottom: 16px;
+  }
+
+  h1.title-large {
+    font-size: 1.7rem;
+  }
+
+  .layout-card {
+    grid-template-columns: 2.6ch minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  /* inline style on the box carries the mini grid/flex pattern, so the
+     hide needs the heavier hand */
+  .layout-preview-box {
+    display: none !important;
+  }
+
+  .layout-info h3 {
+    font-size: 15px;
+  }
+
+  .btn-group {
+    gap: 10px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    min-height: 50px;
+    padding: 12px 18px;
+    font-size: 14.5px;
+  }
+
+  #drive-qr-img {
+    width: 180px;
+    height: 180px;
+  }
+
+  .session-timer-badge strong {
+    font-size: 1.6rem;
+  }
+}
+
+/* ------------------------------------------------ reduced motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

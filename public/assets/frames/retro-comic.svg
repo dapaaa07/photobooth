@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1700" width="1200" height="1700">
+  <!-- Bold Comic Outer Frame -->
+  <rect x="18" y="18" width="1164" height="1664" fill="none" stroke="#facc15" stroke-width="12" rx="20"/>
+  <rect x="30" y="30" width="1140" height="1640" fill="none" stroke="#06b6d4" stroke-width="6" rx="14"/>
+
+  <!-- Comic Speech Burst - Top Right -->
+  <g transform="translate(1000, 35)">
+    <polygon points="0,30 30,0 70,10 100,0 90,40 120,60 80,70 70,100 40,80 10,90 20,60 -10,40" fill="#ef4444" stroke="#000" stroke-width="4"/>
+    <text x="50" y="55" font-family="'Archivo Black', sans-serif" font-weight="900" font-size="20" fill="#ffffff" text-anchor="middle">POW!</text>
+  </g>
+
+  <!-- Comic Speech Burst - Bottom Left -->
+  <g transform="translate(50, 1570)">
+    <polygon points="0,20 25,-10 60,0 80,-10 70,25 95,40 65,50 55,75 30,60 5,70 15,45 -10,30" fill="#f59e0b" stroke="#000" stroke-width="4"/>
+    <text x="40" y="40" font-family="'Archivo Black', sans-serif" font-weight="900" font-size="18" fill="#000000" text-anchor="middle">SNAP!</text>
+  </g>
+
+  <text x="600" y="1660" font-family="'Archivo Black', sans-serif" font-weight="900" font-size="28" fill="#facc15" stroke="#000" stroke-width="2" text-anchor="middle" letter-spacing="3">⚡ RETRO COMIC PHOTOBOOTH ⚡</text>
+</svg>

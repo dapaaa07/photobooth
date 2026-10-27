@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1700" width="1200" height="1700">
+  <defs>
+    <linearGradient id="synthGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="50%" stop-color="#d946ef"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Synthwave Neon Border -->
+  <rect x="20" y="20" width="1160" height="1660" fill="none" stroke="url(#synthGrad)" stroke-width="10" rx="16"/>
+
+  <!-- Synth Sunset Triangle Top Center -->
+  <g transform="translate(600, 30)">
+    <polygon points="0,0 -40,60 40,60" fill="none" stroke="#f43f5e" stroke-width="4"/>
+    <circle cx="0" cy="40" r="22" fill="#f59e0b" opacity="0.8"/>
+  </g>
+
+  <!-- Dark Grid Accent Lines at Bottom -->
+  <g stroke="#06b6d4" stroke-width="2" opacity="0.6">
+    <line x1="50" y1="1620" x2="1150" y2="1620"/>
+    <line x1="50" y1="1640" x2="1150" y2="1640"/>
+    <line x1="50" y1="1660" x2="1150" y2="1660"/>
+  </g>
+
+  <text x="600" y="1650" font-family="'Plus Jakarta Sans', sans-serif" font-weight="900" font-size="24" fill="#d946ef" text-anchor="middle" letter-spacing="6">SYNTHWAVE 80S 🌆 RETRO CYBER</text>
+</svg>

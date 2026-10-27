@@ -8,8 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     targetShots: 3,   // Default 3 camera photos for 3x2 grid
     currentShotIndex: 0,
     photos: [],       // Holds raw camera photos [A, B, C]
-    frameColor: '#ffffff',
-    frameTheme: 'genesis-editorial',
+    frameTheme: 'diesnat-2x3_1',
     filter: 'normal',
     brandingText: 'DIESNATALIS HIMATIKOM 2026',
     renderedFileName: null,
@@ -306,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  document.querySelectorAll('.layout-card, .theme-chip, .color-swatch, .filter-chip')
+  document.querySelectorAll('.layout-card, .theme-chip, .filter-chip')
     .forEach(enableKeyboardClick);
 
   // --- SCREEN 2: LAYOUT SELECTION ---
@@ -393,25 +392,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --- SCREEN 4: EDITOR ---
-  // Frame Theme Selection Chips
+  // Frame Theme Selection Chips; Diesnat has holes for the 6-slot sheet
+  // only, so other layouts fall back to Genesis
   const themeChips = document.querySelectorAll('.theme-chip');
   themeChips.forEach(chip => {
     chip.addEventListener('click', () => {
+      let target = chip;
+      if (chip.dataset.theme === 'diesnat-2x3_1' && state.selectedLayout !== '3x2-grid') {
+        const genesis = [...themeChips].find(t => t.dataset.theme === 'genesis-editorial');
+        if (genesis) target = genesis;
+      }
       themeChips.forEach(t => t.classList.remove('selected'));
-      chip.classList.add('selected');
-      state.frameTheme = chip.dataset.theme;
+      target.classList.add('selected');
+      state.frameTheme = target.dataset.theme;
       editor.setFrameTheme(state.frameTheme);
-    });
-  });
-
-  // Color Swatch pickers
-  const colorSwatches = document.querySelectorAll('.color-swatch');
-  colorSwatches.forEach(swatch => {
-    swatch.addEventListener('click', () => {
-      colorSwatches.forEach(s => s.classList.remove('selected'));
-      swatch.classList.add('selected');
-      state.frameColor = swatch.dataset.color;
-      editor.setFrameColor(state.frameColor);
     });
   });
 
@@ -439,7 +433,6 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({
           photos: state.photos,
           layout: state.selectedLayout,
-          frameColor: state.frameColor,
           frameTheme: state.frameTheme,
           filter: state.filter,
           brandingText: state.brandingText

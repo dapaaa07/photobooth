@@ -136,14 +136,38 @@ async function createPhotoCollage(rawPhotoBase64Array, options = {}) {
       const col = i % 2;
       const row = Math.floor(i / 2);
 
+      // Diesnat frame: photo rects lifted from its transparent holes
+      // (pct of canvas + 0.6% pad) so photos sit exactly under the cutouts
+      let leftPx, topPx, itemWidthPx, itemHeightPx;
+      if (frameTheme === 'diesnat-2x3_1') {
+        const rects = [
+          [0.1109, 0.1465, 0.2584, 0.1577],
+          [0.6164, 0.1465, 0.2584, 0.1577],
+          [0.1109, 0.3836, 0.2584, 0.1662],
+          [0.6164, 0.3836, 0.2584, 0.1662],
+          [0.1109, 0.6242, 0.2584, 0.1695],
+          [0.6164, 0.6242, 0.2584, 0.1695]
+        ];
+        const [rx, ry, rw, rh] = rects[i];
+        itemWidthPx = Math.round(rw * canvasWidth);
+        itemHeightPx = Math.round(rh * canvasHeight);
+        leftPx = Math.round(rx * canvasWidth);
+        topPx = Math.round(ry * canvasHeight);
+      } else {
+        itemWidthPx = itemWidth;
+        itemHeightPx = itemHeight;
+        leftPx = leftMargin + col * (itemWidth + gap);
+        topPx = topMargin + row * (itemHeight + gap);
+      }
+
       const resized = await sharp(photoBuffers[i])
-        .resize(itemWidth, itemHeight, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
+        .resize(itemWidthPx, itemHeightPx, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
         .toBuffer();
 
       compositeInputs.push({
         input: resized,
-        left: leftMargin + col * (itemWidth + gap),
-        top: topMargin + row * (itemHeight + gap)
+        left: leftPx,
+        top: topPx
       });
     }
 

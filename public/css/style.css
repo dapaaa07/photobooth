@@ -701,19 +701,6 @@ p.subtitle {
   color: var(--paper);
 }
 
-.color-swatch {
-  width: 36px;
-  height: 36px;
-  border: 1px solid rgba(34, 29, 21, 0.18);
-  border-radius: var(--r-s);
-  cursor: pointer;
-  transition: box-shadow 0.16s ease;
-}
-
-.color-swatch.selected {
-  box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--accent);
-}
-
 /* ---------------------------------------------- screen 5: success --- */
 
 #screen-success {
@@ -872,10 +859,6 @@ p.subtitle {
 
   .btn-thumb-retake:not(:disabled):hover {
     background: rgba(34, 29, 21, 0.06);
-  }
-
-  .color-swatch:hover {
-    box-shadow: 0 0 0 1px rgba(34, 29, 21, 0.25);
   }
 }
 

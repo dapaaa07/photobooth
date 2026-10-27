@@ -8,7 +8,7 @@ class PhotoboothEditor {
     this.photos = [];
     this.layout = '3x2-grid';
     this.frameColor = '#ffffff';
-    this.frameTheme = 'genesis-editorial';
+    this.frameTheme = 'diesnat-2x3_1';
     this.filter = 'normal';
     this.brandingText = 'DIESNATALIS HIMATIKOM 2026';
     this.loadedFrameImage = null;
@@ -45,11 +45,6 @@ class PhotoboothEditor {
     } else {
       this.render();
     }
-  }
-
-  setFrameColor(color) {
-    this.frameColor = color;
-    this.render();
   }
 
   setFrameTheme(themeName) {
@@ -172,19 +167,36 @@ class PhotoboothEditor {
 
     // 2. Render photo placements (ALL PORTRAIT SLOTS)
     if (this.layout === '3x2-grid') {
-      // 2 Columns x 3 Rows (6 Portrait Slots)
-      const slotW = 250;
-      const slotH = 265; // Portrait slot
-      const marginX = 33;
-      const marginY = 30;
-      const gap = 34;
+      if (this.frameTheme === 'diesnat-2x3_1') {
+        // Rects lifted from the frame's transparent holes (pct + 0.6% pad),
+        // scanned from public/assets/frames/diesnat-2x3_1.png
+        const rects = [
+          [0.1109, 0.1465, 0.2584, 0.1577],
+          [0.6164, 0.1465, 0.2584, 0.1577],
+          [0.1109, 0.3836, 0.2584, 0.1662],
+          [0.6164, 0.3836, 0.2584, 0.1662],
+          [0.1109, 0.6242, 0.2584, 0.1695],
+          [0.6164, 0.6242, 0.2584, 0.1695]
+        ];
+        for (let i = 0; i < Math.min(6, loadedImages.length); i++) {
+          const [rx, ry, rw, rh] = rects[i];
+          drawSlot(loadedImages[i], rx * w, ry * h, rw * w, rh * h);
+        }
+      } else {
+        // 2 Columns x 3 Rows (6 Portrait Slots)
+        const slotW = 250;
+        const slotH = 265; // Portrait slot
+        const marginX = 33;
+        const marginY = 30;
+        const gap = 34;
 
-      for (let i = 0; i < Math.min(6, loadedImages.length); i++) {
-        const col = i % 2;
-        const row = Math.floor(i / 2);
-        const x = marginX + col * (slotW + gap);
-        const y = marginY + row * (slotH + gap);
-        drawSlot(loadedImages[i], x, y, slotW, slotH);
+        for (let i = 0; i < Math.min(6, loadedImages.length); i++) {
+          const col = i % 2;
+          const row = Math.floor(i / 2);
+          const x = marginX + col * (slotW + gap);
+          const y = marginY + row * (slotH + gap);
+          drawSlot(loadedImages[i], x, y, slotW, slotH);
+        }
       }
 
     } else if (this.layout === '3-strip') {

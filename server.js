@@ -10,6 +10,7 @@ const { createPhotoCollage } = require('./services/imageProcessor');
 const { sendPhotoEmail } = require('./services/mailer');
 const { uploadToGoogleDrive } = require('./services/driveUploader');
 const { checkDslrStatus, captureDslrPhoto } = require('./services/dslrCamera');
+const { redeem, listTokens } = require('./services/tokens');
 
 const app = express();
 const HTTP_PORT = process.env.PORT || 3000;
@@ -142,6 +143,25 @@ app.get('/api/camera/status', async (req, res) => {
   } catch (err) {
     res.status(500).json({ connected: false, error: err.message });
   }
+});
+
+/**
+ * API: Redeem a photo-session token (1 token = 1 session, single use)
+ */
+app.post('/api/tokens/redeem', (req, res) => {
+  const result = redeem(req.body && req.body.token);
+  if (result.ok) return res.json({ success: true, token: result.token });
+  if (result.reason === 'used') {
+    return res.status(410).json({ success: false, error: 'Token sudah dipakai.' });
+  }
+  return res.status(404).json({ success: false, error: 'Token tidak dikenal.' });
+});
+
+/**
+ * API: Operator token list (local kiosk network only)
+ */
+app.get('/api/admin/tokens', (req, res) => {
+  res.json({ success: true, tokens: listTokens() });
 });
 
 /**

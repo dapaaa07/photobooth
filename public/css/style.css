@@ -252,6 +252,126 @@ p.subtitle {
   height: 112px;
 }
 
+/* live token-scan preview replaces the static glyph */
+.welcome-scanbox {
+  position: relative;
+  width: min(100%, 340px);
+  aspect-ratio: 4 / 3;
+  background: var(--ink);
+  border-radius: var(--r-m);
+  overflow: hidden;
+}
+
+.welcome-scanbox video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.scan-corners i {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 3px solid #fff;
+  opacity: 0.9;
+}
+
+.scan-corners i:nth-child(1) { top: 12px; left: 12px; border-right: none; border-bottom: none; border-radius: 6px 0 0 0; }
+.scan-corners i:nth-child(2) { top: 12px; right: 12px; border-left: none; border-bottom: none; border-radius: 0 6px 0 0; }
+.scan-corners i:nth-child(3) { bottom: 12px; left: 12px; border-right: none; border-top: none; border-radius: 0 0 0 6px; }
+.scan-corners i:nth-child(4) { bottom: 12px; right: 12px; border-left: none; border-top: none; border-radius: 0 0 6px 0; }
+
+/* scan status row under the welcome copy */
+.scan-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.scan-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: scan-pulse 1.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.scan-status.error {
+  color: var(--accent);
+}
+
+.scan-status.error .scan-dot {
+  background: var(--accent);
+  animation: none;
+}
+
+@keyframes scan-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+/* token accepted modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(24, 19, 13, 0.55);
+  padding: 20px;
+}
+
+.modal-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  padding: clamp(28px, 4vw, 44px);
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.modal-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  margin: 0;
+  color: var(--ink);
+}
+
+.modal-card .subtitle {
+  margin: 0;
+}
+
+.modal-check {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 30px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-card .btn-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
 .welcome-visual-label {
   font-family: var(--font-display);
   font-style: italic;

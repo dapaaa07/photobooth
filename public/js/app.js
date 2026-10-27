@@ -220,7 +220,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Lifecycle actions per screen
-    if (screenId === 'camera') {
+    if (screenId === 'welcome') {
+      startWelcomeScan();
+    } else if (screenId === 'camera') {
+      stopWelcomeScan();
       stopEditorTimer();
       camera.startCamera();
       resetCameraSessionUI();
@@ -235,8 +238,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     } else if (screenId === 'editor') {
+      stopWelcomeScan();
       startEditorTimer();
     } else {
+      stopWelcomeScan();
       camera.stopCamera();
       stopEditorTimer();
     }
@@ -358,6 +363,128 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-start').addEventListener('click', () => {
     camera.initAudio();
     showScreen('layout');
+  });
+
+  // --- TOKEN SCAN (camera always on at welcome, 1 token = 1 session) ---
+  const welcomeVideo = document.getElementById('welcome-video');
+  const scanStatus = document.getElementById('scan-status');
+  const scanStatusText = document.getElementById('scan-status-text');
+  const tokenModal = document.getElementById('token-modal');
+  const tokenModalText = document.getElementById('token-modal-text');
+  const scanCanvas = document.createElement('canvas');
+  let scanTimer = null;
+  let scanBusy = false;
+  let tokenAccepted = false;
+  let lastRejectedToken = null;
+  let lastRejectedAt = 0;
+
+  function setScanStatus(msg, isError) {
+    if (scanStatusText) scanStatusText.textContent = msg;
+    if (scanStatus) scanStatus.classList.toggle('error', !!isError);
+  }
+
+  async function startWelcomeScan() {
+    tokenAccepted = false;
+    scanBusy = false;
+    if (tokenModal) tokenModal.style.display = 'none';
+    setScanStatus('Menyiapkan kamera...');
+    try {
+      await camera.startCamera();
+      if (camera.stream && welcomeVideo && welcomeVideo.srcObject !== camera.stream) {
+        welcomeVideo.srcObject = camera.stream;
+        await welcomeVideo.play().catch(() => {});
+      }
+      if (!camera.stream) {
+        setScanStatus('Kamera tidak tersedia.', true);
+        return;
+      }
+      setScanStatus('Arahkan QR token ke kamera...');
+      stopWelcomeScanLoop();
+      scanTimer = setInterval(scanFrameForToken, 600);
+    } catch (err) {
+      console.warn('Welcome camera unavailable:', err);
+      setScanStatus('Kamera tidak tersedia.', true);
+    }
+  }
+
+  function stopWelcomeScanLoop() {
+    if (scanTimer) {
+      clearInterval(scanTimer);
+      scanTimer = null;
+    }
+  }
+
+  function stopWelcomeScan() {
+    stopWelcomeScanLoop();
+    if (welcomeVideo) welcomeVideo.srcObject = null;
+  }
+
+  function scanFrameForToken() {
+    if (scanBusy || tokenAccepted || document.hidden) return;
+    if (!welcomeVideo || !welcomeVideo.videoWidth) return;
+    if (typeof window.jsQR !== 'function') return;
+    const scale = Math.min(1, 480 / welcomeVideo.videoWidth);
+    scanCanvas.width = Math.round(welcomeVideo.videoWidth * scale);
+    scanCanvas.height = Math.round(welcomeVideo.videoHeight * scale);
+    const ctx = scanCanvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(welcomeVideo, 0, 0, scanCanvas.width, scanCanvas.height);
+    let code = null;
+    try {
+      const img = ctx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
+      code = window.jsQR(img.data, scanCanvas.width, scanCanvas.height);
+    } catch (err) {
+      return;
+    }
+    if (code && code.data) redeemToken(code.data.trim());
+  }
+
+  async function redeemToken(token) {
+    if (!token || scanBusy || tokenAccepted) return;
+    const now = Date.now();
+    // Same rejected QR stays in view: don't hammer the server
+    if (token === lastRejectedToken && now - lastRejectedAt < 5000) return;
+    scanBusy = true;
+    setScanStatus('Memeriksa token...');
+    try {
+      const res = await fetch('/api/tokens/redeem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+      const data = await res.json();
+      if (data.success) {
+        tokenAccepted = true;
+        stopWelcomeScanLoop();
+        if (tokenModalText) tokenModalText.textContent = 'Token ' + data.token + ' diterima. Satu sesi foto siap dimulai.';
+        if (tokenModal) tokenModal.style.display = 'flex';
+        setScanStatus('Token diterima.');
+      } else {
+        lastRejectedToken = token;
+        lastRejectedAt = now;
+        setScanStatus(data.error || 'Token tidak valid.', true);
+        setTimeout(() => {
+          if (!tokenAccepted) setScanStatus('Arahkan QR token ke kamera...');
+        }, 2500);
+      }
+    } catch (err) {
+      setScanStatus('Gangguan jaringan, coba lagi.', true);
+    } finally {
+      scanBusy = false;
+    }
+  }
+
+  document.getElementById('btn-token-start').addEventListener('click', () => {
+    if (tokenModal) tokenModal.style.display = 'none';
+    camera.initAudio();
+    showScreen('layout');
+  });
+
+  document.getElementById('btn-token-cancel').addEventListener('click', () => {
+    if (tokenModal) tokenModal.style.display = 'none';
+    tokenAccepted = false;
+    setScanStatus('Arahkan QR token ke kamera...');
+    stopWelcomeScanLoop();
+    scanTimer = setInterval(scanFrameForToken, 600);
   });
 
   // Clickable div controls carry no keyboard behavior by default; expose
@@ -517,6 +644,16 @@ document.addEventListener('DOMContentLoaded', () => {
       editor.setFilter(state.filter);
     });
   });
+
+  // Welcome is the initial screen: boot the always-on token scan camera
+  showScreen('welcome');
+
+  // Commissioning helper: /?token=DSN11-XXXXXX redeems immediately, so the
+  // modal path can be tested without holding a printed QR to the camera
+  const presetToken = new URLSearchParams(location.search).get('token');
+  if (presetToken) {
+    setTimeout(() => redeemToken(presetToken.trim()), 800);
+  }
 
   // Save Editor & Request High-Res Backend Render & Auto Google Drive Upload
   document.getElementById('btn-save-editor').addEventListener('click', async () => {

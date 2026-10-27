@@ -99,28 +99,38 @@ class PhotoboothCamera {
     await this.checkDslrStatus();
 
     try {
-      if (this.stream) return;
-      const constraints = {
-        video: {
-          width: { ideal: 3840, min: 1920 },
-          height: { ideal: 2160, min: 1080 },
-          facingMode: 'user'
-        },
-        audio: false
-      };
-      this.stream = await navigator.mediaDevices.getUserMedia(constraints);
-      this.videoElement.srcObject = this.stream;
-      await this.videoElement.play();
+      if (!this.stream) {
+        const constraints = {
+          video: {
+            width: { ideal: 3840, min: 1920 },
+            height: { ideal: 2160, min: 1080 },
+            facingMode: 'user'
+          },
+          audio: false
+        };
+        this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+      }
+      await this.attachPreview();
     } catch (err) {
       console.error('Camera Access Error:', err);
       try {
         this.stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-        this.videoElement.srcObject = this.stream;
-        await this.videoElement.play();
+        await this.attachPreview();
       } catch (e) {
         console.warn('Browser webcam unavailable:', e);
       }
     }
+  }
+
+  // Shared stream: welcome scan preview and main video feed use one stream
+  attachPreview() {
+    if (this.stream && !this.videoElement.srcObject) {
+      this.videoElement.srcObject = this.stream;
+    }
+    if (this.videoElement.srcObject) {
+      return this.videoElement.play().catch(() => {});
+    }
+    return Promise.resolve();
   }
 
   stopCamera() {

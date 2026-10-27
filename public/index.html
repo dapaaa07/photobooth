@@ -11,24 +11,42 @@
 
   <div id="app">
 
-    <!-- Screen 1: Welcome -->
+    <!-- Screen 1: Welcome + token scan -->
     <div id="screen-welcome" class="screen active">
       <div class="welcome-split">
         <div class="welcome-copy">
           <h1 class="title-large">Abadikan Momen Diesnatalis</h1>
-          <p class="subtitle">Sentuh layar untuk memulai sesi photobooth perayaan Dies Natalis HIMATIKOM 2026.</p>
-          <button id="btn-start" class="btn-primary">
+          <p class="subtitle">Pindai QR token Anda di depan kamera untuk memulai sesi foto. Satu token berlaku untuk satu sesi.</p>
+          <button id="btn-start" class="btn-primary" style="display:none;">
             <span>Mulai Foto Sekarang</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
+          <div id="scan-status" class="scan-status">
+            <span class="scan-dot" aria-hidden="true"></span>
+            <span id="scan-status-text">Menyiapkan kamera...</span>
+          </div>
           <p class="welcome-meta">4 Layout / 3 Tema / 6 Filter / QR Drive</p>
         </div>
-        <div class="welcome-visual" aria-hidden="true">
-          <svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
-            <circle cx="12" cy="13" r="3"/>
-          </svg>
-          <span class="welcome-visual-label">Photobooth<br>Kiosk<br>2026</span>
+        <div class="welcome-visual">
+          <div class="welcome-scanbox">
+            <video id="welcome-video" autoplay playsinline muted></video>
+            <div class="scan-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          </div>
+          <!-- hiasan diganti pratinjau kamera -->
+          <span class="welcome-visual-label">Pindai QR di sini</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Token accepted modal -->
+    <div id="token-modal" class="modal-overlay" style="display:none;">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="token-modal-title">
+        <div class="modal-check" aria-hidden="true">✓</div>
+        <h2 id="token-modal-title">Token Diterima</h2>
+        <p class="subtitle" id="token-modal-text">Satu sesi foto siap dimulai.</p>
+        <div class="btn-group">
+          <button id="btn-token-cancel" class="btn-secondary"><span>Batal</span></button>
+          <button id="btn-token-start" class="btn-primary"><span>Mulai Foto</span></button>
         </div>
       </div>
     </div>
@@ -255,10 +273,11 @@
   </div>
 
   <!-- Client JavaScript Modules -->
-  <script src="/js/camera.js?v=26"></script>
-  <script src="/js/editor.js?v=26"></script>
-  <script src="/js/recap.js?v=26"></script>
-  <script src="/js/virtualKeyboard.js?v=26"></script>
-  <script src="/js/app.js?v=26"></script>
+  <script src="/js/vendor/jsqr.js?v=1"></script>
+  <script src="/js/camera.js?v=29"></script>
+  <script src="/js/editor.js?v=29"></script>
+  <script src="/js/recap.js?v=29"></script>
+  <script src="/js/virtualKeyboard.js?v=29"></script>
+  <script src="/js/app.js?v=29"></script>
 </body>
 </html>

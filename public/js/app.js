@@ -177,10 +177,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (screenId === 'camera') {
       camera.startCamera();
       resetCameraSessionUI();
+      // Crop guide depends on layout+theme and on live video dims; refresh
+      // now and again once metadata arrives
+      camera.updateCropGuideFor(state.selectedLayout, state.frameTheme);
+      const feed = document.getElementById('video-feed');
+      if (feed && !feed.dataset.guideHooked) {
+        feed.dataset.guideHooked = '1';
+        feed.addEventListener('loadedmetadata', () => {
+          camera.updateCropGuideFor(state.selectedLayout, state.frameTheme);
+        });
+      }
     } else {
       camera.stopCamera();
     }
   }
+
+  // Keep the crop guide aligned when the kiosk viewport changes
+  window.addEventListener('resize', () => {
+    if (screens.camera && screens.camera.classList.contains('active')) {
+      camera.updateCropGuideFor(state.selectedLayout, state.frameTheme);
+    }
+  });
 
   /**
    * Reset Camera Session UI state
@@ -345,6 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.frameTheme = null;
       }
       syncThemeChips();
+      camera.updateCropGuideFor(state.selectedLayout, state.frameTheme);
     });
   });
 
@@ -434,6 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
       chip.classList.add('selected');
       state.frameTheme = chip.dataset.theme;
       editor.setFrameTheme(state.frameTheme);
+      camera.updateCropGuideFor(state.selectedLayout, state.frameTheme);
     });
   });
   syncThemeChips();

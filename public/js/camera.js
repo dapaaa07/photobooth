@@ -130,6 +130,102 @@ class PhotoboothCamera {
     }
   }
 
+  /**
+   * Target photo aspect (w/h) per layout+theme, derived from the server
+   * slot rects: 3x2 Denim slot1 620x583, Lace slot1 748x778,
+   * 3-strip slot1 1710x970, 2x2 1000x1360, polaroid 2080x2600
+   */
+  static cropAspectFor(layout, frameTheme) {
+    if (layout === '3x2-grid') {
+      return frameTheme === 'diesnat-3x2_2' ? 0.9619 : 1.0628;
+    }
+    if (layout === '3-strip') return 1.7632;
+    if (layout === '2x2-grid') return 1000 / 1360;
+    if (layout === 'polaroid') return 2080 / 2600;
+    return null;
+  }
+
+  /**
+   * Crop guide overlay: the captured photo is the FULL video frame, while
+   * the preview shows it with object-fit:cover. The safe rect is the
+   * center crop of the capture at the slot aspect, mapped through the
+   * cover transform onto the container; bands outside it will be cut.
+   */
+  updateCropGuideFor(layout, frameTheme) {
+    const guide = document.getElementById('crop-guide');
+    if (!guide) return;
+    const targetAspect = PhotoboothCamera.cropAspectFor(layout, frameTheme);
+    const video = this.videoElement;
+    const container = video ? video.parentElement : null;
+    const vw = video ? video.videoWidth : 0;
+    const vh = video ? video.videoHeight : 0;
+    if (!targetAspect || !container || !vw || !vh) {
+      guide.style.display = 'none';
+      return;
+    }
+    const cw = container.clientWidth;
+    const ch = container.clientHeight;
+    if (!cw || !ch) {
+      guide.style.display = 'none';
+      return;
+    }
+    guide.style.display = 'block';
+
+    const captureAspect = vw / vh;
+    const boxAspect = cw / ch;
+
+    // Visible capture region under object-fit:cover (centered, in capture px)
+    let visW, visH;
+    if (boxAspect > captureAspect) {
+      visW = vw;
+      visH = vw / boxAspect;
+    } else {
+      visH = vh;
+      visW = vh * boxAspect;
+    }
+
+    // Safe rect: center crop of the FULL capture at target aspect
+    let safeW, safeH;
+    if (captureAspect > targetAspect) {
+      safeH = vh;
+      safeW = vh * targetAspect;
+    } else {
+      safeW = vw;
+      safeH = vw / targetAspect;
+    }
+
+    // Intersect with the visible region (both centered on capture center)
+    const showW = Math.min(safeW, visW);
+    const showH = Math.min(safeH, visH);
+
+    // Map capture px -> container px
+    const scale = cw / visW;
+    const dw = Math.round(showW * scale);
+    const dh = Math.round(showH * scale);
+    const dx = Math.round((cw - dw) / 2);
+    const dy = Math.round((ch - dh) / 2);
+
+    const q = (sel) => guide.querySelector(sel);
+    const safe = q('.crop-safe');
+    safe.style.left = dx + 'px';
+    safe.style.top = dy + 'px';
+    safe.style.width = dw + 'px';
+    safe.style.height = dh + 'px';
+
+    const top = q('.crop-shade-top');
+    const bottom = q('.crop-shade-bottom');
+    const left = q('.crop-shade-left');
+    const right = q('.crop-shade-right');
+    top.style.height = dy + 'px';
+    bottom.style.height = (ch - dy - dh) + 'px';
+    left.style.width = dx + 'px';
+    left.style.top = dy + 'px';
+    left.style.height = dh + 'px';
+    right.style.width = (cw - dx - dw) + 'px';
+    right.style.top = dy + 'px';
+    right.style.height = dh + 'px';
+  }
+
   triggerFlash() {
     this.playShutterSound();
     this.flashElement.classList.remove('flash');

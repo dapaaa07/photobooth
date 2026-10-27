@@ -59,6 +59,20 @@ function generateTokens(count = 5, label = '') {
 }
 
 /**
+ * Check a token without consuming it (scan gate). Returns the same shape
+ * as redeem but never writes.
+ */
+function validate(rawToken) {
+  const token = normalize(rawToken);
+  if (!token) return { ok: false, reason: 'unknown' };
+  const d = getDb();
+  const row = d.prepare('SELECT token, used_at FROM tokens WHERE token = ?').get(token);
+  if (!row) return { ok: false, reason: 'unknown' };
+  if (row.used_at) return { ok: false, reason: 'used' };
+  return { ok: true, token };
+}
+
+/**
  * Redeem one token: valid + unused -> marked used atomically.
  * Returns { ok:true, token } or { ok:false, reason:'unknown'|'used' }
  */
@@ -85,4 +99,4 @@ function deleteByLabel(label) {
   return getDb().prepare('DELETE FROM tokens WHERE label = ?').run(label);
 }
 
-module.exports = { generateTokens, redeem, listTokens, deleteByLabel, normalize };
+module.exports = { generateTokens, validate, redeem, listTokens, deleteByLabel, normalize };

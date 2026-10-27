@@ -138,6 +138,11 @@ class PhotoboothCamera {
       this.stream.getTracks().forEach(track => track.stop());
       this.stream = null;
     }
+    // Detach so the next startCamera attaches the fresh stream; a stale
+    // srcObject would keep attachPreview from wiring the new stream (blank)
+    if (this.videoElement) {
+      this.videoElement.srcObject = null;
+    }
   }
 
   /**

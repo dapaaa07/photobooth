@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     brandingText: 'DIESNATALIS HIMATIKOM 2026',
     renderedFileName: null,
     userEmail: '',
+    sessionToken: null, // validated at scan, consumed only on Drive upload
     // Session timer & recap state
     timerSecondsLeft: 0,
     sessionExpired: false,
@@ -435,10 +436,10 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       return;
     }
-    if (code && code.data) redeemToken(code.data.trim());
+    if (code && code.data) validateToken(code.data.trim());
   }
 
-  async function redeemToken(token) {
+  async function validateToken(token) {
     if (!token || scanBusy || tokenAccepted) return;
     const now = Date.now();
     // Same rejected QR stays in view: don't hammer the server
@@ -446,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
     scanBusy = true;
     setScanStatus('Memeriksa token...');
     try {
-      const res = await fetch('/api/tokens/redeem', {
+      const res = await fetch('/api/tokens/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token })
@@ -454,6 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (data.success) {
         tokenAccepted = true;
+        state.sessionToken = data.token;
         stopWelcomeScanLoop();
         if (tokenModalText) tokenModalText.textContent = 'Token ' + data.token + ' diterima. Satu sesi foto siap dimulai.';
         if (tokenModal) tokenModal.style.display = 'flex';
@@ -482,6 +484,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-token-cancel').addEventListener('click', () => {
     if (tokenModal) tokenModal.style.display = 'none';
     tokenAccepted = false;
+    // Cancel costs nothing: the token stays unused until a Drive upload
+    state.sessionToken = null;
     setScanStatus('Arahkan QR token ke kamera...');
     stopWelcomeScanLoop();
     scanTimer = setInterval(scanFrameForToken, 600);
@@ -652,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // modal path can be tested without holding a printed QR to the camera
   const presetToken = new URLSearchParams(location.search).get('token');
   if (presetToken) {
-    setTimeout(() => redeemToken(presetToken.trim()), 800);
+    setTimeout(() => validateToken(presetToken.trim()), 800);
   }
 
   // Save Editor & Request High-Res Backend Render & Auto Google Drive Upload
@@ -678,6 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (data.success) {
         state.renderedFileName = data.fileName;
         showSuccessScreen(data.drive);
+        consumeSessionToken(data.drive);
       } else {
         alert('Gagal memproses foto: ' + (data.error || 'Terjadi kesalahan'));
       }
@@ -699,6 +704,24 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- SUCCESS SCREEN & AUTO RESET WITH DRIVE QR CODE ---
+  // Token accounting: a token counts as used only when the session photo
+  // has uploaded to Drive successfully. Cancel/abandon costs nothing.
+  async function consumeSessionToken(driveData) {
+    if (!state.sessionToken) return;
+    if (!driveData || driveData.uploaded !== true) return;
+    const token = state.sessionToken;
+    try {
+      const res = await fetch('/api/tokens/redeem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+      const data = await res.json();
+      if (data.success) state.sessionToken = null;
+    } catch (err) {
+      console.warn('Token consume request failed (token stays valid):', err);
+    }
+  }
   function showSuccessScreen(driveData) {
     const qrImgEl = document.getElementById('drive-qr-img');
     const driveStatusMsg = document.getElementById('drive-status-msg');
@@ -752,6 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (resetTimer) clearInterval(resetTimer);
     stopSessionTimer();
     stopEditorTimer();
+    state.sessionToken = null;
     recap.stop();
     state.photos = [];
     state.captures = [];

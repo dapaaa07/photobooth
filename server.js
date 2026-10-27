@@ -10,7 +10,7 @@ const { createPhotoCollage } = require('./services/imageProcessor');
 const { sendPhotoEmail } = require('./services/mailer');
 const { uploadToGoogleDrive } = require('./services/driveUploader');
 const { checkDslrStatus, captureDslrPhoto } = require('./services/dslrCamera');
-const { redeem, listTokens } = require('./services/tokens');
+const { redeem, validate, listTokens } = require('./services/tokens');
 
 const app = express();
 const HTTP_PORT = process.env.PORT || 3000;
@@ -146,7 +146,21 @@ app.get('/api/camera/status', async (req, res) => {
 });
 
 /**
- * API: Redeem a photo-session token (1 token = 1 session, single use)
+ * API: Validate a photo-session token WITHOUT consuming it (scan gate).
+ * The token is only consumed on successful Drive upload (see redeem).
+ */
+app.post('/api/tokens/validate', (req, res) => {
+  const result = validate(req.body && req.body.token);
+  if (result.ok) return res.json({ success: true, token: result.token });
+  if (result.reason === 'used') {
+    return res.status(410).json({ success: false, error: 'Token sudah dipakai.' });
+  }
+  return res.status(404).json({ success: false, error: 'Token tidak dikenal.' });
+});
+
+/**
+ * API: Redeem a photo-session token (1 token = 1 session, single use).
+ * Called once the session's photo has uploaded to Drive successfully.
  */
 app.post('/api/tokens/redeem', (req, res) => {
   const result = redeem(req.body && req.body.token);

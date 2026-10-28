@@ -267,7 +267,7 @@ p.subtitle {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scaleX(-1);
+  /* mirror dihapus: kamera & scan QR sekarang sama (tidak cermin) */
 }
 
 .scan-corners i {

@@ -23,7 +23,7 @@ layout; area gelap = perkiraan terpotong. Dihitung dari dimensi video aktual
 masuk kamera, metadata tiba, dan resize.
 
 Sumber jepretan: DSLR (`gphoto2`, jika terdeteksi) else webcam penuh
-(`videoWidth × videoHeight`, di-mirror seperti selfie).
+(`videoWidth × videoHeight`, **tidak di-mirror** — preview dan hasil foto sama).
 
 ## 4. Editor — pratinjau + timer 90 dtk
 

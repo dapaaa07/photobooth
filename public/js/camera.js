@@ -253,13 +253,12 @@ class PhotoboothCamera {
     canvas.width = this.videoElement.videoWidth || 1920;
     canvas.height = this.videoElement.videoHeight || 1080;
     const ctx = canvas.getContext('2d');
-    
+
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
 
-    // Mirror horizontally to match webcam selfie view
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
+    // Render as-is (no mirror); preview sekarang juga tidak di-mirror,
+    // jadi jepretan = apa yang dilihat pengunjung.
     ctx.drawImage(this.videoElement, 0, 0, canvas.width, canvas.height);
     
     return canvas.toDataURL('image/jpeg', 1.0);

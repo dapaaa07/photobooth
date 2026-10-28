@@ -15,4 +15,4 @@ Drive (`text/plain`).
 | `GET /api/status` | — | `{status, serverTime, localIPs, httpPort, httpsPort}` |
 
 File statis: `public/` di `/`, `storage/` di `/storage/` (`Cache-Control: no-cache`).
-Versi cache-bust: CSS `?v=13`, JS `?v=30`.
+Versi cache-bust: CSS `?v=13`, JS `?v=31`.

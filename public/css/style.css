@@ -413,12 +413,27 @@ p.subtitle {
 }
 
 .layout-preview-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 96px;
   height: 104px;
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--r-s);
   padding: 7px;
+}
+
+/* real-frame miniature replaces the generic grid (see buildLayoutMini) */
+.layout-preview-box img {
+  display: block;
+  max-width: 82px;
+  max-height: 90px;
+  width: auto;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 3px;
+  box-shadow: 0 1px 4px rgba(34, 29, 21, 0.18);
 }
 
 .mini-photo-slot {

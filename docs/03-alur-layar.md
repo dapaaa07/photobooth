@@ -12,6 +12,11 @@ Tombol mulai lama disembunyikan (tetap ada di DOM untuk operator/pengujian).
 `3x2 Grid Portrait` (3 foto → 6 slot), `Classic 3-Strip` (3 foto),
 `2x2 Grid Portrait` (2 foto → 4 slot), `Polaroid Portrait` (1 foto).
 Frame mengikuti layout otomatis (lihat `06-frame-layout.md`).
+Miniatur pada kartu menampilkan **frame aslinya** (lubang hasil pindai alpha
+PNG, digambar ulang via `PhotoboothCamera.buildLayoutMini` di `camera.js`,
+peta layout→frame di `LAYOUT_MINI_THEMES`); layout tanpa desain frame (2x2,
+polaroid) tetap memakai grid generik. Saat desain frame baru untuk layout itu
+jadi, cukup tambahkan satu entri di peta tersebut.
 
 ## 3. Kamera — jepret bertahap + timer sesi
 

@@ -331,6 +331,92 @@ class PhotoboothCamera {
   }
 
   /**
+   * Miniature of the final print for a layout, drawn from the real frame
+   * PNG's transparent holes (alpha scan) so proportions match the result.
+   * Layouts without a frame design get null -> caller keeps the generic grid.
+   */
+  static buildLayoutMini(layout) {
+    const theme = PhotoboothCamera.LAYOUT_MINI_THEMES[layout];
+    if (!theme) return Promise.resolve(null);
+    return PhotoboothCamera.scanHolesFromFrame(theme).then(holes => {
+      if (!holes || !holes.rects.length) return null;
+      const W = 96;
+      const H = Math.round(W * holes.h / holes.w);
+      const canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#EAE3D4';
+      for (const r of holes.rects) {
+        ctx.fillRect(r.x * W, r.y * H, r.w * W, r.h * H);
+      }
+      return new Promise(res => {
+        const img = new Image();
+        img.onload = () => { ctx.drawImage(img, 0, 0, W, H); res(canvas.toDataURL('image/png')); };
+        img.onerror = () => res(canvas.toDataURL('image/png'));
+        img.src = holes.url;
+      });
+    });
+  }
+
+  static async scanHolesFromFrame(theme) {
+    const url = '/assets/frames/' + theme + '.png';
+    const img = new Image();
+    const ok = await new Promise(res => { img.onload = () => res(true); img.onerror = () => res(false); img.src = url; });
+    if (!ok || !img.naturalWidth) return null;
+    // Downscale to <=160px wide so the alpha scan stays cheap
+    const w = 160;
+    const h = Math.max(1, Math.round(w * img.naturalHeight / img.naturalWidth));
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0, w, h);
+    const data = ctx.getImageData(0, 0, w, h).data;
+    const alphaAt = (x, y) => data[(y * w + x) * 4 + 3];
+    const seen = new Uint8Array(w * h);
+    const rects = [];
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const i = y * w + x;
+        if (seen[i] || alphaAt(x, y) > 12) continue;
+        // flood-fill this transparent region (4-connected)
+        let minX = x, maxX = x, minY = y, maxY = y, n = 0;
+        const stack = [[x, y]];
+        seen[i] = 1;
+        while (stack.length) {
+          const [cx, cy] = stack.pop();
+          n++;
+          if (cx < minX) minX = cx;
+          if (cx > maxX) maxX = cx;
+          if (cy < minY) minY = cy;
+          if (cy > maxY) maxY = cy;
+          const near = [[cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]];
+          for (const [nx, ny] of near) {
+            if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+            const j = ny * w + nx;
+            if (!seen[j] && alphaAt(nx, ny) <= 12) { seen[j] = 1; stack.push([nx, ny]); }
+          }
+        }
+        const rwPx = maxX - minX + 1, rhPx = maxY - minY + 1;
+        // keep photo-sized windows only (ignore logo cut-outs etc.)
+        if (n < w * h * 0.005) continue;
+        if (rwPx < w * 0.08 || rhPx < h * 0.05) continue;
+        rects.push({
+          x: minX / w, y: minY / h,
+          w: rwPx / w, h: rhPx / h
+        });
+      }
+    }
+    if (!rects.length) return null;
+    // reading order: rows by top edge, then left-to-right
+    rects.sort((a, b) => (Math.abs(a.y - b.y) > 0.04 ? a.y - b.y : a.x - b.x));
+    return { rects, url, w, h };
+  }
+
+  /**
    * Universal Photo Capture (Tries DSLR hardware first, falls back to Webcam)
    */
   async capturePhoto() {
@@ -380,3 +466,13 @@ class PhotoboothCamera {
 }
 
 window.PhotoboothCamera = PhotoboothCamera;
+
+/**
+ * Layout -> frame used for the miniature preview on the layout screen.
+ * Only layouts with a real frame design are listed; anything absent keeps
+ * the generic grid markup (design belum dibuat).
+ */
+PhotoboothCamera.LAYOUT_MINI_THEMES = {
+  '3x2-grid': 'diesnat-3x2_1',   // Diesnat Denim (frame default layout ini)
+  '3-strip': 'diesnat-3x1_1'     // Diesnat Strip
+};

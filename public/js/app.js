@@ -82,6 +82,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Layout cards: show each frame's real hole layout as the card preview.
+  // Layouts without a frame design keep the generic grid markup.
+  document.querySelectorAll('.layout-card').forEach(card => {
+    PhotoboothCamera.buildLayoutMini(card.dataset.layout).then(url => {
+      if (!url) return;
+      const box = card.querySelector('.layout-preview-box');
+      if (!box) return;
+      box.innerHTML = '<img src="' + url + '" alt="Pratinjau ' + card.dataset.layout + '">';
+    }).catch(() => { /* keep generic grid */ });
+  });
+
   const sessionTimerBadge = document.getElementById('session-timer-badge');
   const sessionTimerText = document.getElementById('session-timer-text');
   const editorTimeoutNotice = document.getElementById('editor-timeout-notice');

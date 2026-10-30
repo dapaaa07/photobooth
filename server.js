@@ -1,7 +1,9 @@
-require('dotenv').config();
+const path = require('path');
+// Muat .env dari folder proyek (bukan CWD) supaya "node server.js" yang
+// dijalankan dari luar folder tetap membaca kredensial.
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
@@ -131,6 +133,45 @@ app.get('/api/status', (req, res) => {
     httpPort: HTTP_PORT,
     httpsPort: HTTPS_PORT
   });
+});
+
+/**
+ * API: Diagnosa jalur upload Drive tanpa perlu sesi foto.
+ * GET /api/drive/test?file=path.png (opsional; default file dummy 1x1).
+ */
+app.get('/api/drive/test', async (req, res) => {
+  const checks = {
+    webappUrlConfigured: !!(process.env.GOOGLE_DRIVE_WEBAPP_URL || '').startsWith('http'),
+    folderIdConfigured: !!(process.env.GOOGLE_DRIVE_FOLDER_ID && process.env.GOOGLE_DRIVE_FOLDER_ID !== 'your_folder_id_here'),
+    saKeyPath: process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH || '(default google-credentials.json)',
+    // jalur relatif di .env dihitung dari akar proyek (sama dengan driveUploader)
+    saKeyExists: (() => {
+      const p = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH;
+      const resolved = p
+        ? (path.isAbsolute(p) ? p : path.join(__dirname, p))
+        : path.join(__dirname, 'google-credentials.json');
+      return fs.existsSync(resolved);
+    })()
+  };
+  try {
+    let tmpFile = req.query.file && fs.existsSync(req.query.file) ? req.query.file : null;
+    if (!tmpFile) {
+      tmpFile = path.join(__dirname, 'storage', 'rendered', '.drive-selftest.png');
+      // PNG 1x1 putih
+      fs.writeFileSync(tmpFile, Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+        'base64'));
+    }
+    const result = await uploadToGoogleDrive(tmpFile, 'drive-selftest-' + Date.now() + '.png');
+    res.json({
+      success: true, checks,
+      uploaded: result.uploaded,
+      qrTarget: result.folderUrl || result.driveWebViewLink || null,
+      message: result.message, error: result.error || null
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, checks, error: err.message });
+  }
 });
 
 /**

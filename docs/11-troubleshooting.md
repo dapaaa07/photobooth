@@ -13,6 +13,25 @@ datang dalam keadaan ter-mirror atau terputar, buka `/?setup=1`, masuk ke layar
 kamera, pilih tombol **Orientasi** yang membuat gambar tampak benar — tersimpan
 per perangkat dan ikut dipakai saat foto & scan QR.
 
+## Clone di laptop lain: upload gagal & QR menunjuk localhost
+
+Bersifat normal: `dapa-drive.json` dan `.env` tidak ikut repo (git-ignore,
+kredensial). Susunannya manual — tapi yang membuat QR "localhost" biasanya
+rantai ini:
+
+1. `.env` dulu dimuat dari current working directory; `node server.js` yang
+   dijalankan di luar folder proyek mengabaikannya. Sudah diperbaiki (path
+   eksplisit `__dirname/.env`), tapi tetap disarankan jalan dari folder
+   proyek.
+2. WebApp menolak respons non-JSON/error ("Akses ditolak: DriveApp",
+   halaman login) — cek deployment Apps Script: *Execute as: Me* +
+   *Who has access: Anyone*, dan akun deploy aktif.
+3. Tanpa folder URL, fallback QR dulu hardcode `localhost:3000` — sudah
+   diganti IP LAN / `PB_PUBLIC_URL` (lihat 07).
+
+Cara memverifikasi setiap clone: buka `http://<host>:3000/api/drive/test`
+(lihat hasilnya) atau `GET /api/admin/tokens` untuk memastikan server hidup.
+
 ## Server lama vs kode baru
 
 Rute API dimuat saat proses start. Setelah edit `services/` atau `server.js`,

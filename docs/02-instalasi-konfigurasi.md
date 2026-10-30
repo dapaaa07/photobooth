@@ -26,6 +26,7 @@ Kiosk: `http://<ip-lan>:3000` (HTTP, `PORT`), HTTPS `https://<ip-lan>:3443`
 | Kunci | Wajib | Keterangan |
 |---|---|---|
 | `PORT` / `HTTPS_PORT` | tidak | Default `3000` / `3443` |
+| `PB_PUBLIC_URL` | tidak | URL publik kiosk untuk QR fallback (mis. `http://192.168.0.105:3000`); tanpa ini dipakai IP LAN yang terdeteksi otomatis |
 | `GOOGLE_DRIVE_WEBAPP_URL` | disarankan | Upload via Apps Script WebApp (prioritas 1, bebas kuota SA) |
 | `GOOGLE_DRIVE_FOLDER_ID` / `_FOLDER_URL` | ya utk Drive | Folder tujuan. Set folder **"Siapa pun dengan link — viewer"** agar HP pengunjung bisa unduh |
 | `GOOGLE_SERVICE_ACCOUNT_KEY_PATH` | jika tanpa WebApp | Path JSON kredensial SA (atau `GOOGLE_CLIENT_EMAIL` + `GOOGLE_PRIVATE_KEY`) |

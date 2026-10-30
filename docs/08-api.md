@@ -13,6 +13,7 @@ Drive (`text/plain`).
 | `GET /api/camera/status` | — | `{connected, model?, gphoto2Installed?, message?}` |
 | `POST /api/camera/capture-dslr` | — | `{success, dataUrl?}` (fallback webcam bila gagal) |
 | `GET /api/status` | — | `{status, serverTime, localIPs, httpPort, httpsPort}` |
+| `GET /api/drive/test` | — | Upload uji 1×1 px + kondisi kredensial (diagnosa clone laptop baru) |
 
 File statis: `public/` di `/`, `storage/` di `/storage/` (`Cache-Control: no-cache`).
 Versi cache-bust: CSS `?v=16`, JS `?v=33`.

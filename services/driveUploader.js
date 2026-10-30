@@ -1,14 +1,40 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { google } = require('googleapis');
 const QRCode = require('qrcode');
+
+/**
+ * Alamat LAN kiosk untuk QR fallback (foto lokal). localhost hanya benar
+ * kalau browser berjalan DI kiosk itu sendiri; QR dipindai dari HP, jadi
+ * harus memakai IP LAN. Urutan: env PB_PUBLIC_URL, lalu IP LAN pertama.
+ */
+function localBaseUrl() {
+  if (process.env.PB_PUBLIC_URL) {
+    return process.env.PB_PUBLIC_URL.replace(/\/+$/, '');
+  }
+  const port = process.env.PORT || 3000;
+  const ifaces = os.networkInterfaces();
+  for (const devName of Object.keys(ifaces)) {
+    for (const alias of ifaces[devName] || []) {
+      if (alias.family === 'IPv4' && !alias.internal) {
+        return `http://${alias.address}:${port}`;
+      }
+    }
+  }
+  return `http://localhost:${port}`;
+}
 
 /**
  * Initializes Google Drive API client using Service Account credentials
  */
 function getDriveClient() {
-  const keyPath = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH || path.join(__dirname, '../google-credentials.json');
-  
+  const envPath = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH || path.join(__dirname, '../google-credentials.json');
+  // Jalur relatif di .env diselesaikan terhadap folder proyek, bukan CWD
+  // (mengetik ./dapa-drive.json di .env tetap benar walau server dijalankan
+  // dari luar folder).
+  const keyPath = path.isAbsolute(envPath) ? envPath : path.join(__dirname, '..', envPath);
+
   if (fs.existsSync(keyPath)) {
     const auth = new google.auth.GoogleAuth({
       keyFile: keyPath,
@@ -60,14 +86,31 @@ async function uploadToGoogleDrive(localFilePath, fileName) {
         redirect: 'follow'
       });
 
-      const resData = await response.json();
+      // Diagnosa: kalau respons bukan JSON (halaman login Google / HTML),
+      // tampilkan petunjuk penyebab paling umum di laptop lain.
+      const rawBody = await response.text();
+      let resData;
+      try {
+        resData = JSON.parse(rawBody);
+      } catch (parseErr) {
+        console.error('❌ WebApp merespons non-JSON (HTTP ' + response.status +
+          '). Kemungkinan deployment "Execute as" bukan Anyone atau akses butuh login Google.');
+        throw parseErr;
+      }
+      if (!resData.url && !resData.fileUrl) {
+        // WebApp merespons JSON tapi isinya error/tautan folder saja:
+        // file TIDAK terbukti terupload -> jangan klaim sukses.
+        console.warn('⚠️ WebApp tanpa url file (berarti gagal atau hanya tautan folder):', rawBody.slice(0, 200));
+        throw new Error('WebApp tidak mengembalikan tautan file (' +
+          (resData.error || 'field url/fileUrl kosong') + ')');
+      }
       console.log('✅ Foto berhasil diupload via Google Drive WebApp!');
 
       // QR points directly at the uploaded photo file; folder only as fallback
       const targetScanUrl = resData.url
         || resData.fileUrl
         || folderUrl
-        || `http://localhost:3000/storage/rendered/${fileName}`;
+        || `${localBaseUrl()}/storage/rendered/${fileName}`;
       const qrCodeDataUrl = await QRCode.toDataURL(targetScanUrl, { margin: 1, width: 260 });
 
       return {
@@ -79,6 +122,10 @@ async function uploadToGoogleDrive(localFilePath, fileName) {
       };
     } catch (webAppErr) {
       console.error('❌ Gagal upload via Apps Script WebApp:', webAppErr.message);
+      console.error('   Coba cek cepat di laptop ini:');
+      console.error('   1) URL WebApp benar & deployment "Execute as: Anyone","Who has access: Anyone".');
+      console.error('   2) Akun Google yang deploy aktif + kuota Apps Script belum habis.');
+      console.error('   3) Laptop punya akses internet ke script.google.com (buka manual /exec di browser).');
     }
   }
 
@@ -88,7 +135,7 @@ async function uploadToGoogleDrive(localFilePath, fileName) {
   if (!drive || !folderId || folderId === 'your_folder_id_here') {
     console.warn('⚠️ Google Drive credentials/Folder ID not configured in .env. Photo saved locally in storage/rendered.');
     
-    const fallbackUrl = folderUrl || `http://localhost:3000/storage/rendered/${fileName}`;
+    const fallbackUrl = folderUrl || `${localBaseUrl()}/storage/rendered/${fileName}`;
     const qrCodeDataUrl = await QRCode.toDataURL(fallbackUrl, { margin: 1, width: 260 });
 
     return {
@@ -125,7 +172,7 @@ async function uploadToGoogleDrive(localFilePath, fileName) {
     // QR points directly at the uploaded photo's Drive viewer link
     const targetScanUrl = response.data.webViewLink
       || folderUrl
-      || `http://localhost:3000/storage/rendered/${fileName}`;
+      || `${localBaseUrl()}/storage/rendered/${fileName}`;
     const qrCodeDataUrl = await QRCode.toDataURL(targetScanUrl, { margin: 1, width: 260 });
 
     return {
@@ -140,7 +187,7 @@ async function uploadToGoogleDrive(localFilePath, fileName) {
   } catch (err) {
     console.error('❌ Gagal upload ke Google Drive API:', err.message);
     
-    const fallbackUrl = folderUrl || `http://localhost:3000/storage/rendered/${fileName}`;
+    const fallbackUrl = folderUrl || `${localBaseUrl()}/storage/rendered/${fileName}`;
     const qrCodeDataUrl = await QRCode.toDataURL(fallbackUrl, { margin: 1, width: 260 });
 
     return {

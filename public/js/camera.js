@@ -18,18 +18,31 @@ class PhotoboothCamera {
     this.isDslrConnected = false;
     this.dslrModel = null;
     this.deviceId = null;
-    this.fix = 'none';
+    this.fix = 'mirror'; // Default mirror (selfie-view: kepala ke kiri = di layar ke kiri)
   }
 
   // --- Per-device orientation fix -------------------------------------------
 
   loadFixForDevice() {
-    const id = this.deviceId || 'default';
-    let stored = 'none';
+    // Reset any old override so default is mirror (kepala ke kiri = di layar ke kiri)
     try {
-      stored = localStorage.getItem('pb-cam-fix-' + id) || 'none';
+      if (!localStorage.getItem('pb-cam-selfie-v2')) {
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('pb-cam-fix-')) {
+            localStorage.removeItem(k);
+          }
+        }
+        localStorage.setItem('pb-cam-selfie-v2', '1');
+      }
     } catch (err) { /* storage blocked */ }
-    this.fix = ['mirror', 'rotate180', 'flipv'].includes(stored) ? stored : 'none';
+
+    const id = this.deviceId || 'default';
+    let stored = null;
+    try {
+      stored = localStorage.getItem('pb-cam-fix-' + id);
+    } catch (err) { /* storage blocked */ }
+    this.fix = ['mirror', 'rotate180', 'flipv', 'none'].includes(stored) ? stored : 'mirror';
     this.applyFixToPreview();
     return this.fix;
   }
@@ -39,22 +52,26 @@ class PhotoboothCamera {
     if (this.fix === 'mirror') return 'scaleX(-1)';
     if (this.fix === 'rotate180') return 'rotate(180deg)';
     if (this.fix === 'flipv') return 'scaleY(-1)';
-    return '';
+    if (this.fix === 'none') return 'scaleX(1)';
+    return 'scaleX(-1)';
   }
 
   applyFixToPreview() {
     [this.videoElement, document.getElementById('welcome-video')].forEach(v => {
       if (v) v.style.transform = this.fixCssTransform();
     });
+    if (typeof window.onPhotoboothCameraFixChanged === 'function') {
+      window.onPhotoboothCameraFixChanged(this.fix);
+    }
   }
 
-  /** Called by the setup buttons; persists per device and re-applies live. */
+  /** Called by orientation buttons; persists per device and re-applies live. */
   setFix(mode) {
-    this.fix = ['mirror', 'rotate180', 'flipv', 'none'].includes(mode) ? mode : 'none';
+    this.fix = ['mirror', 'rotate180', 'flipv', 'none'].includes(mode) ? mode : 'mirror';
     try {
       const key = 'pb-cam-fix-' + (this.deviceId || 'default');
-      if (this.fix === 'none') localStorage.removeItem(key);
-      else localStorage.setItem(key, this.fix);
+      localStorage.setItem(key, this.fix);
+      localStorage.setItem('pb-cam-selfie-v2', '1');
     } catch (err) { /* storage blocked */ }
     this.applyFixToPreview();
     return this.fix;

@@ -16,4 +16,4 @@ Drive (`text/plain`).
 | `GET /api/drive/test` | — | Upload uji 1×1 px + kondisi kredensial (diagnosa clone laptop baru) |
 
 File statis: `public/` di `/`, `storage/` di `/storage/` (`Cache-Control: no-cache`).
-Versi cache-bust: CSS `?v=16`, JS `?v=33`.
+Versi cache-bust: CSS `?v=18`, JS `?v=35`.

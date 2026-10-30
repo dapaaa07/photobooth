@@ -32,10 +32,10 @@ Sumber jepretan: DSLR (`gphoto2`, jika terdeteksi) else webcam penuh
 frame mentah = preview = foto untuk semua perangkat. Kamera external tertentu
 (aplikasi HP- jadi-webcam seperti DroidCam) kadang mengirim stream yang sudah
 ter-mirror/terputar; untuk itu ada **koreksi per perangkat** di layar kamera
-saat mode komisioning `/?setup=1`: tombol Orientasi (Normal / Mirror / Balik
-180° / Terbalik). Pilihan tersimpan otomatis per deviceId
+(Normal / Mirror / Balik 180° / Terbalik) serta tombol **Balik Kamera** di
+layar welcome scan QR. Pilihan tersimpan otomatis per deviceId
 (`localStorage pb-cam-fix-<id>`) dan berlaku seragam ke preview welcome,
-preview kamera, dan hasil jepretan.
+scan canvas QR, preview kamera, dan hasil jepretan.
 
 ## 4. Editor — pratinjau + timer 90 dtk
 

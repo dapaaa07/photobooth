@@ -58,29 +58,40 @@ document.addEventListener('DOMContentLoaded', () => {
     return typeof v === 'number' && v > 0 ? v : null;
   })();
 
-  // Commissioning helper: /?setup=1 shows the per-camera orientation row
-  // (Normal/Mirror/Balik/Terbalik) on the camera screen. Choice persists
-  // per device in localStorage and applies to preview + capture alike.
-  const SETUP_MODE = new URLSearchParams(location.search).get('setup') === '1';
-  if (SETUP_MODE) {
-    const orientRow = document.getElementById('cam-orient-row');
+  // Camera orientation controls (Normal/Mirror/Balik/Terbalik).
+  // Choice persists per device in localStorage and applies to preview + capture alike.
+  const orientRow = document.getElementById('cam-orient-row');
+  const btnWelcomeFlip = document.getElementById('btn-welcome-flip');
+
+  function updateOrientationUI() {
     if (orientRow) {
-      orientRow.classList.add('visible');
-      const markSelected = () => {
-        orientRow.querySelectorAll('[data-cam-fix]').forEach(b =>
-          b.classList.toggle('selected', b.getAttribute('data-cam-fix') === camera.fix));
-      };
-      orientRow.addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-cam-fix]');
-        if (!btn) return;
-        camera.setFix(btn.getAttribute('data-cam-fix'));
-        markSelected();
-      });
-      // camera.fix may load later once the stream/deviceId is known
-      setInterval(markSelected, 1500);
-      markSelected();
+      orientRow.querySelectorAll('[data-cam-fix]').forEach(b =>
+        b.classList.toggle('selected', b.getAttribute('data-cam-fix') === camera.fix));
+    }
+    if (btnWelcomeFlip) {
+      btnWelcomeFlip.classList.toggle('selected', camera.fix === 'mirror');
     }
   }
+
+  if (orientRow) {
+    orientRow.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-cam-fix]');
+      if (!btn) return;
+      camera.setFix(btn.getAttribute('data-cam-fix'));
+      updateOrientationUI();
+    });
+  }
+
+  if (btnWelcomeFlip) {
+    btnWelcomeFlip.addEventListener('click', () => {
+      camera.setFix(camera.fix === 'mirror' ? 'none' : 'mirror');
+      updateOrientationUI();
+    });
+  }
+
+  window.onPhotoboothCameraFixChanged = updateOrientationUI;
+  setInterval(updateOrientationUI, 1500);
+  updateOrientationUI();
 
   // Layout cards: show each frame's real hole layout as the card preview.
   // Layouts without a frame design keep the generic grid markup.
@@ -466,11 +477,23 @@ document.addEventListener('DOMContentLoaded', () => {
     scanCanvas.width = Math.round(welcomeVideo.videoWidth * scale);
     scanCanvas.height = Math.round(welcomeVideo.videoHeight * scale);
     const ctx = scanCanvas.getContext('2d', { willReadFrequently: true });
-    ctx.drawImage(welcomeVideo, 0, 0, scanCanvas.width, scanCanvas.height);
     let code = null;
     try {
-      const img = ctx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
+      // 1. Scan raw camera frame (standard orientation for physical QR cards facing camera)
+      ctx.drawImage(welcomeVideo, 0, 0, scanCanvas.width, scanCanvas.height);
+      let img = ctx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
       code = window.jsQR(img.data, scanCanvas.width, scanCanvas.height);
+
+      // 2. Fallback: try flipped frame if raw scan did not detect QR
+      if (!code) {
+        ctx.save();
+        ctx.translate(scanCanvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(welcomeVideo, 0, 0, scanCanvas.width, scanCanvas.height);
+        ctx.restore();
+        img = ctx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
+        code = window.jsQR(img.data, scanCanvas.width, scanCanvas.height);
+      }
     } catch (err) {
       return;
     }

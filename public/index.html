@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="color-scheme" content="light">
   <title>DIESNATALIS HIMATIKOM 2026</title>
-  <link rel="stylesheet" href="/css/style.css?v=16">
+  <link rel="stylesheet" href="/css/style.css?v=18">
 </head>
 <body>
 
@@ -32,8 +32,16 @@
             <video id="welcome-video" autoplay playsinline muted></video>
             <div class="scan-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
           </div>
-          <!-- hiasan diganti pratinjau kamera -->
-          <span class="welcome-visual-label">Pindai QR di sini</span>
+          <!-- kontrol orientasi & label scan -->
+          <div class="welcome-visual-bar">
+            <span class="welcome-visual-label">Pindai QR di sini</span>
+            <button type="button" id="btn-welcome-flip" class="btn-chip theme-chip welcome-flip-btn" title="Balik kamera (Hilangkan efek mirror)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px;">
+                <path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3m8-18h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3M12 2v20"/>
+              </svg>
+              <span>Balik Kamera</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -161,13 +169,13 @@
 
           <div id="camera-thumbnails-strip" class="camera-thumbnails-strip"></div>
 
-          <!-- Operator-only orientation fix (per kamera, tersimpan otomatis) -->
+          <!-- Orientasi kamera (tersimpan otomatis per perangkat) -->
           <div id="cam-orient-row" class="cam-orient-row" title="Koreksi orientasi kamera ini">
-            <span>Orientasi</span>
-            <button type="button" class="btn-chip" data-cam-fix="none">Normal</button>
-            <button type="button" class="btn-chip" data-cam-fix="mirror">Mirror</button>
-            <button type="button" class="btn-chip" data-cam-fix="rotate180">Balik 180°</button>
-            <button type="button" class="btn-chip" data-cam-fix="flipv">Terbalik</button>
+            <span>Orientasi:</span>
+            <button type="button" class="btn-chip theme-chip" data-cam-fix="mirror">Cermin (Selfie)</button>
+            <button type="button" class="btn-chip theme-chip" data-cam-fix="none">Normal</button>
+            <button type="button" class="btn-chip theme-chip" data-cam-fix="rotate180">Balik 180°</button>
+            <button type="button" class="btn-chip theme-chip" data-cam-fix="flipv">Terbalik</button>
           </div>
 
           <div class="camera-status-bar">
@@ -283,10 +291,10 @@
 
   <!-- Client JavaScript Modules -->
   <script src="/js/vendor/jsqr.js?v=1"></script>
-  <script src="/js/camera.js?v=33"></script>
+  <script src="/js/camera.js?v=35"></script>
   <script src="/js/editor.js?v=33"></script>
   <script src="/js/recap.js?v=33"></script>
   <script src="/js/virtualKeyboard.js?v=33"></script>
-  <script src="/js/app.js?v=33"></script>
+  <script src="/js/app.js?v=35"></script>
 </body>
 </html>

@@ -267,7 +267,7 @@ p.subtitle {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* mirror dihapus: kamera & scan QR sekarang sama (tidak cermin) */
+  transform: scaleX(-1);
 }
 
 .scan-corners i {
@@ -372,6 +372,14 @@ p.subtitle {
   margin-top: 8px;
 }
 
+.welcome-visual-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(100%, 340px);
+  gap: 10px;
+}
+
 .welcome-visual-label {
   font-family: var(--font-display);
   font-style: italic;
@@ -379,6 +387,13 @@ p.subtitle {
   line-height: 1.5;
   text-align: center;
   color: var(--grey);
+}
+
+.welcome-flip-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
 }
 
 /* ------------------------------------------- screen 2: layout --- */
@@ -507,6 +522,7 @@ p.subtitle {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: scaleX(-1);
 }
 
 .camera-source-badge {
@@ -662,9 +678,9 @@ p.subtitle {
   font-weight: 600;
 }
 
-/* operator-only orientation row (per-device fix, see camera.js) */
+/* camera orientation row (per-device fix, see camera.js) */
 .cam-orient-row {
-  display: none; /* shown via ?setup=1 */
+  display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
@@ -672,10 +688,7 @@ p.subtitle {
   color: var(--grey);
 }
 
-.cam-orient-row.visible {
-  display: flex;
-}
-
+.cam-orient-row .btn-chip,
 .cam-orient-row .theme-chip {
   padding: 6px 10px;
   font-size: 12px;

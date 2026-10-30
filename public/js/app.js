@@ -58,6 +58,30 @@ document.addEventListener('DOMContentLoaded', () => {
     return typeof v === 'number' && v > 0 ? v : null;
   })();
 
+  // Commissioning helper: /?setup=1 shows the per-camera orientation row
+  // (Normal/Mirror/Balik/Terbalik) on the camera screen. Choice persists
+  // per device in localStorage and applies to preview + capture alike.
+  const SETUP_MODE = new URLSearchParams(location.search).get('setup') === '1';
+  if (SETUP_MODE) {
+    const orientRow = document.getElementById('cam-orient-row');
+    if (orientRow) {
+      orientRow.classList.add('visible');
+      const markSelected = () => {
+        orientRow.querySelectorAll('[data-cam-fix]').forEach(b =>
+          b.classList.toggle('selected', b.getAttribute('data-cam-fix') === camera.fix));
+      };
+      orientRow.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-cam-fix]');
+        if (!btn) return;
+        camera.setFix(btn.getAttribute('data-cam-fix'));
+        markSelected();
+      });
+      // camera.fix may load later once the stream/deviceId is known
+      setInterval(markSelected, 1500);
+      markSelected();
+    }
+  }
+
   const sessionTimerBadge = document.getElementById('session-timer-badge');
   const sessionTimerText = document.getElementById('session-timer-text');
   const editorTimeoutNotice = document.getElementById('editor-timeout-notice');
@@ -395,6 +419,9 @@ document.addEventListener('DOMContentLoaded', () => {
         welcomeVideo.srcObject = camera.stream;
         await welcomeVideo.play().catch(() => {});
       }
+      // Re-apply the per-device orientation fix now that both previews
+      // (welcome + camera) are attached to this stream.
+      camera.applyFixToPreview();
       if (!camera.stream) {
         setScanStatus('Kamera tidak tersedia.', true);
         return;

@@ -1,5 +1,11 @@
 /**
  * Camera Handler & Audio Countdown Engine with DSLR Hardware Support & Auto Webcam Fallback
+ *
+ * Orientation policy: nothing is mirrored by default (raw sensor frame =
+ * preview = photo). Some external cameras (phone-as-webcam apps) deliver a
+ * pre-mirrored or rotated stream; those get a per-device correction set
+ * from the camera screen, persisted in localStorage as
+ * `pb-cam-fix-<deviceId>`: mirror | rotate180 | flipv | none.
  */
 class PhotoboothCamera {
   constructor() {
@@ -11,6 +17,47 @@ class PhotoboothCamera {
     this.audioCtx = null;
     this.isDslrConnected = false;
     this.dslrModel = null;
+    this.deviceId = null;
+    this.fix = 'none';
+  }
+
+  // --- Per-device orientation fix -------------------------------------------
+
+  loadFixForDevice() {
+    const id = this.deviceId || 'default';
+    let stored = 'none';
+    try {
+      stored = localStorage.getItem('pb-cam-fix-' + id) || 'none';
+    } catch (err) { /* storage blocked */ }
+    this.fix = ['mirror', 'rotate180', 'flipv'].includes(stored) ? stored : 'none';
+    this.applyFixToPreview();
+    return this.fix;
+  }
+
+  /** CSS transform for the live previews (capture uses canvas math). */
+  fixCssTransform() {
+    if (this.fix === 'mirror') return 'scaleX(-1)';
+    if (this.fix === 'rotate180') return 'rotate(180deg)';
+    if (this.fix === 'flipv') return 'scaleY(-1)';
+    return '';
+  }
+
+  applyFixToPreview() {
+    [this.videoElement, document.getElementById('welcome-video')].forEach(v => {
+      if (v) v.style.transform = this.fixCssTransform();
+    });
+  }
+
+  /** Called by the setup buttons; persists per device and re-applies live. */
+  setFix(mode) {
+    this.fix = ['mirror', 'rotate180', 'flipv', 'none'].includes(mode) ? mode : 'none';
+    try {
+      const key = 'pb-cam-fix-' + (this.deviceId || 'default');
+      if (this.fix === 'none') localStorage.removeItem(key);
+      else localStorage.setItem(key, this.fix);
+    } catch (err) { /* storage blocked */ }
+    this.applyFixToPreview();
+    return this.fix;
   }
 
   // Web Audio Synth for Beep & Shutter Sounds
@@ -126,6 +173,13 @@ class PhotoboothCamera {
   attachPreview() {
     if (this.stream && !this.videoElement.srcObject) {
       this.videoElement.srcObject = this.stream;
+    }
+    if (this.stream && !this.deviceId) {
+      const track = this.stream.getVideoTracks()[0];
+      if (track && track.getSettings) {
+        this.deviceId = track.getSettings().deviceId || null;
+      }
+      this.loadFixForDevice();
     }
     if (this.videoElement.srcObject) {
       return this.videoElement.play().catch(() => {});
@@ -257,9 +311,21 @@ class PhotoboothCamera {
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
 
-    // Render as-is (no mirror); preview sekarang juga tidak di-mirror,
-    // jadi jepretan = apa yang dilihat pengunjung.
+    // Foto = orientasi yang sama dengan preview (frame mentah + koreksi
+    // per perangkat bila ada), jadi hasil cetak selalu seperti yang dilihat.
+    ctx.save();
+    if (this.fix === 'mirror') {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    } else if (this.fix === 'rotate180') {
+      ctx.translate(canvas.width, canvas.height);
+      ctx.rotate(Math.PI);
+    } else if (this.fix === 'flipv') {
+      ctx.translate(0, canvas.height);
+      ctx.scale(1, -1);
+    }
     ctx.drawImage(this.videoElement, 0, 0, canvas.width, canvas.height);
+    ctx.restore();
     
     return canvas.toDataURL('image/jpeg', 1.0);
   }

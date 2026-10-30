@@ -21,7 +21,8 @@ Harness hidup di `/tmp/opencode/` (bukan di repo): `mkpreview.sh` menyalin
 
 ## Parameter komisioning (query URL)
 
-`?sessionsecs=N` (timer sesi), `?token=DSN11-XXXXXX` (uji jalur modal).
+`?sessionsecs=N` (timer sesi), `?token=DSN11-XXXXXX` (uji jalur modal),
+`?setup=1` (baris koreksi orientasi kamera per perangkat di layar kamera).
 Keduanya untuk setup/pengujian, bukan alur pengunjung.
 
 ## Batasan lab

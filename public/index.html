@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="color-scheme" content="light">
   <title>DIESNATALIS HIMATIKOM 2026</title>
-  <link rel="stylesheet" href="/css/style.css?v=13">
+  <link rel="stylesheet" href="/css/style.css?v=14">
 </head>
 <body>
 
@@ -161,6 +161,15 @@
 
           <div id="camera-thumbnails-strip" class="camera-thumbnails-strip"></div>
 
+          <!-- Operator-only orientation fix (per kamera, tersimpan otomatis) -->
+          <div id="cam-orient-row" class="cam-orient-row" title="Koreksi orientasi kamera ini">
+            <span>Orientasi</span>
+            <button type="button" class="btn-chip" data-cam-fix="none">Normal</button>
+            <button type="button" class="btn-chip" data-cam-fix="mirror">Mirror</button>
+            <button type="button" class="btn-chip" data-cam-fix="rotate180">Balik 180°</button>
+            <button type="button" class="btn-chip" data-cam-fix="flipv">Terbalik</button>
+          </div>
+
           <div class="camera-status-bar">
             <div class="shot-counter-badge">
               Status: <span id="camera-status-text">Bersiap...</span>
@@ -274,10 +283,10 @@
 
   <!-- Client JavaScript Modules -->
   <script src="/js/vendor/jsqr.js?v=1"></script>
-  <script src="/js/camera.js?v=31"></script>
-  <script src="/js/editor.js?v=30"></script>
-  <script src="/js/recap.js?v=30"></script>
-  <script src="/js/virtualKeyboard.js?v=30"></script>
-  <script src="/js/app.js?v=30"></script>
+  <script src="/js/camera.js?v=32"></script>
+  <script src="/js/editor.js?v=32"></script>
+  <script src="/js/recap.js?v=32"></script>
+  <script src="/js/virtualKeyboard.js?v=32"></script>
+  <script src="/js/app.js?v=32"></script>
 </body>
 </html>

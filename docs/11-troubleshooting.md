@@ -6,6 +6,13 @@ Stream mati tertinggal di `srcObject` sehingga stream baru tak terpasang.
 Perbaikan: `stopCamera` melepas `srcObject` (`camera.js`). Bila terulang:
 restart `node server.js` NGGAK cukup — ini sisi browser; refresh halaman kiosk.
 
+## Kamera external tampil mirror/terbalik
+
+Bawaannya tidak ada mirror; kalau stream kamera external (HP-as-webcam) sudah
+datang dalam keadaan ter-mirror atau terputar, buka `/?setup=1`, masuk ke layar
+kamera, pilih tombol **Orientasi** yang membuat gambar tampak benar — tersimpan
+per perangkat dan ikut dipakai saat foto & scan QR.
+
 ## Server lama vs kode baru
 
 Rute API dimuat saat proses start. Setelah edit `services/` atau `server.js`,

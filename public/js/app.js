@@ -93,15 +93,17 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(updateOrientationUI, 1500);
   updateOrientationUI();
 
-  // Layout cards: show each frame's real hole layout as the card preview.
-  // Layouts without a frame design keep the generic grid markup.
+  // Layout cards: ensure each preview box has its frame miniature.
   document.querySelectorAll('.layout-card').forEach(card => {
-    PhotoboothCamera.buildLayoutMini(card.dataset.layout).then(url => {
-      if (!url) return;
-      const box = card.querySelector('.layout-preview-box');
-      if (!box) return;
-      box.innerHTML = '<img src="' + url + '" alt="Pratinjau ' + card.dataset.layout + '">';
-    }).catch(() => { /* keep generic grid */ });
+    const box = card.querySelector('.layout-preview-box');
+    if (!box) return;
+    box.removeAttribute('style');
+    if (!box.querySelector('img')) {
+      PhotoboothCamera.buildLayoutMini(card.dataset.layout).then(url => {
+        if (!url) return;
+        box.innerHTML = '<img src="' + url + '" alt="Pratinjau ' + card.dataset.layout + '">';
+      }).catch(() => { /* keep generic grid */ });
+    }
   });
 
   const sessionTimerBadge = document.getElementById('session-timer-badge');
@@ -568,8 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .forEach(enableKeyboardClick);
 
   // --- SCREEN 2: LAYOUT SELECTION ---
-  // Frame follows layout: 3x2-grid -> Denim/Lace, 3-strip -> 3x1 strip,
-  // 2x2-grid & polaroid -> frameless (theme group hidden)
+  // Frame follows layout: 3x2-grid -> Denim/Lace, 3-strip -> Strip, 2x2-grid -> Pride, polaroid -> News
   function syncThemeChips() {
     const chips = document.querySelectorAll('.theme-chip');
     const group = chips.length ? chips[0].closest('.control-group') : null;

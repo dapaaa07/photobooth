@@ -35,8 +35,7 @@ class PhotoboothEditor {
     }
   }
 
-  // Layout-compatible theme: mismatched combos fall back to the layout
-  // default; 2x2-grid & polaroid have no frame (null = photos only)
+  // Layout-compatible theme: resolves default frame for each layout (3x2, 3-strip, 2x2-grid, polaroid)
   resolveThemeForLayout() {
     if (this.layout === '3x2-grid') {
       if (this.frameTheme !== 'diesnat-3x2_1' && this.frameTheme !== 'diesnat-3x2_2') {

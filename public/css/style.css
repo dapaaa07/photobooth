@@ -1138,15 +1138,25 @@ p.subtitle {
   }
 
   .layout-card {
-    grid-template-columns: 2.6ch minmax(0, 1fr) auto;
+    grid-template-columns: 2.4ch 54px minmax(0, 1fr) auto;
     gap: 12px;
-    padding: 12px 14px;
+    align-items: center;
+    padding: 10px 12px;
   }
 
-  /* inline style on the box carries the mini grid/flex pattern, so the
-     hide needs the heavier hand */
   .layout-preview-box {
-    display: none !important;
+    display: flex !important;
+    width: 54px;
+    height: 64px;
+    padding: 4px;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .layout-preview-box img {
+    max-width: 46px;
+    max-height: 56px;
   }
 
   .layout-info h3 {

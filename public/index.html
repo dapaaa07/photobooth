@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="color-scheme" content="light">
   <title>DIESNATALIS HIMATIKOM 2026</title>
-  <link rel="stylesheet" href="/css/style.css?v=20">
+  <link rel="stylesheet" href="/css/style.css?v=21">
 </head>
 <body>
 
@@ -138,6 +138,14 @@
             <span></span>
             <span>Webcam Tablet (Auto Fallback)</span>
           </div>
+          <button type="button" id="btn-camera-mirror-toggle" class="camera-mirror-btn is-mirror" title="Ubah mode kamera (Mirror / Mirrorless)">
+            <span class="mirror-dot" aria-hidden="true"></span>
+            <svg class="mirror-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3m8-18h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3M12 2v20"/>
+            </svg>
+            <span class="mirror-label">Mirror</span>
+            <span class="mirror-tag">Cermin</span>
+          </button>
           <video id="video-feed" autoplay playsinline></video>
           <div id="crop-guide" aria-hidden="true">
             <div class="crop-shade crop-shade-top"></div>
@@ -161,9 +169,9 @@
 
           <!-- Orientasi kamera (tersimpan otomatis per perangkat) -->
           <div id="cam-orient-row" class="cam-orient-row" title="Koreksi orientasi kamera ini">
-            <span>Orientasi:</span>
-            <button type="button" class="btn-chip theme-chip" data-cam-fix="mirror">Cermin (Selfie)</button>
-            <button type="button" class="btn-chip theme-chip" data-cam-fix="none">Normal</button>
+            <span>Mode:</span>
+            <button type="button" class="btn-chip theme-chip" data-cam-fix="mirror">Mirror (Cermin)</button>
+            <button type="button" class="btn-chip theme-chip" data-cam-fix="none">Mirrorless (Normal)</button>
             <button type="button" class="btn-chip theme-chip" data-cam-fix="rotate180">Balik 180°</button>
             <button type="button" class="btn-chip theme-chip" data-cam-fix="flipv">Terbalik</button>
           </div>
@@ -290,10 +298,10 @@
 
   <!-- Client JavaScript Modules -->
   <script src="/js/vendor/jsqr.js?v=2"></script>
-  <script src="/js/camera.js?v=40"></script>
-  <script src="/js/editor.js?v=40"></script>
-  <script src="/js/recap.js?v=40"></script>
-  <script src="/js/virtualKeyboard.js?v=40"></script>
-  <script src="/js/app.js?v=40"></script>
+  <script src="/js/camera.js?v=41"></script>
+  <script src="/js/editor.js?v=41"></script>
+  <script src="/js/recap.js?v=41"></script>
+  <script src="/js/virtualKeyboard.js?v=41"></script>
+  <script src="/js/app.js?v=41"></script>
 </body>
 </html>

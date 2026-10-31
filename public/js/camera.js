@@ -437,6 +437,37 @@ class PhotoboothCamera {
     return { rects, url, w, h };
   }
 
+  async applyFixToImageDataUrl(dataUrl) {
+    if (this.fix === 'none') return dataUrl;
+    return new Promise(res => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.save();
+        if (this.fix === 'mirror') {
+          ctx.translate(canvas.width, 0);
+          ctx.scale(-1, 1);
+        } else if (this.fix === 'rotate180') {
+          ctx.translate(canvas.width, canvas.height);
+          ctx.rotate(Math.PI);
+        } else if (this.fix === 'flipv') {
+          ctx.translate(0, canvas.height);
+          ctx.scale(1, -1);
+        }
+        ctx.drawImage(img, 0, 0);
+        ctx.restore();
+        res(canvas.toDataURL('image/jpeg', 0.98));
+      };
+      img.onerror = () => res(dataUrl);
+      img.src = dataUrl;
+    });
+  }
+
   /**
    * Universal Photo Capture (Tries DSLR hardware first, falls back to Webcam)
    */
@@ -453,7 +484,7 @@ class PhotoboothCamera {
         const data = await response.json();
 
         if (data.success && data.dataUrl) {
-          return data.dataUrl;
+          return await this.applyFixToImageDataUrl(data.dataUrl);
         } else {
           console.warn('DSLR capture failed, falling back to webcam frame:', data.error);
         }

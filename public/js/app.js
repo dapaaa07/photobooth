@@ -58,27 +58,78 @@ document.addEventListener('DOMContentLoaded', () => {
     return typeof v === 'number' && v > 0 ? v : null;
   })();
 
-  // Camera orientation controls (Normal/Mirror/Balik/Terbalik).
+  // Camera orientation controls (Mirror / Mirrorless / Balik 180°).
   // Choice persists per device in localStorage and applies to preview + capture alike.
   const orientRow = document.getElementById('cam-orient-row');
   const btnWelcomeFlip = document.getElementById('btn-welcome-flip');
+  const btnCameraMirrorToggle = document.getElementById('btn-camera-mirror-toggle');
+
+  function showCameraNotice(msg) {
+    let notice = document.getElementById('camera-mode-toast');
+    if (!notice) {
+      notice = document.createElement('div');
+      notice.id = 'camera-mode-toast';
+      notice.className = 'camera-mode-toast';
+      const container = document.querySelector('.camera-container');
+      if (container) container.appendChild(notice);
+    }
+    notice.textContent = msg;
+    notice.classList.remove('show');
+    void notice.offsetWidth;
+    notice.classList.add('show');
+    clearTimeout(notice._timer);
+    notice._timer = setTimeout(() => notice.classList.remove('show'), 1600);
+  }
 
   function updateOrientationUI() {
+    const isMirror = camera.fix === 'mirror';
+
+    if (btnCameraMirrorToggle) {
+      btnCameraMirrorToggle.classList.toggle('is-mirror', isMirror);
+      btnCameraMirrorToggle.classList.toggle('is-mirrorless', !isMirror);
+      const label = btnCameraMirrorToggle.querySelector('.mirror-label');
+      const tag = btnCameraMirrorToggle.querySelector('.mirror-tag');
+      if (label) {
+        label.textContent = isMirror ? 'Mirror' : 'Mirrorless';
+      }
+      if (tag) {
+        tag.textContent = isMirror ? 'Cermin' : 'Normal';
+      }
+      btnCameraMirrorToggle.setAttribute('aria-pressed', isMirror ? 'true' : 'false');
+      btnCameraMirrorToggle.setAttribute(
+        'title',
+        isMirror ? 'Mode Cermin Aktif. Klik untuk ganti ke Mirrorless (Normal).' : 'Mode Mirrorless (Normal). Klik untuk ganti ke Mirror (Cermin).'
+      );
+    }
+
     if (orientRow) {
       orientRow.querySelectorAll('[data-cam-fix]').forEach(b =>
         b.classList.toggle('selected', b.getAttribute('data-cam-fix') === camera.fix));
     }
     if (btnWelcomeFlip) {
-      btnWelcomeFlip.classList.toggle('selected', camera.fix === 'mirror');
+      btnWelcomeFlip.classList.toggle('selected', isMirror);
     }
+  }
+
+  if (btnCameraMirrorToggle) {
+    btnCameraMirrorToggle.addEventListener('click', () => {
+      const nextMode = camera.fix === 'mirror' ? 'none' : 'mirror';
+      camera.setFix(nextMode);
+      updateOrientationUI();
+      showCameraNotice(nextMode === 'mirror' ? 'Mode Kamera: Mirror (Cermin)' : 'Mode Kamera: Mirrorless (Normal)');
+    });
   }
 
   if (orientRow) {
     orientRow.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-cam-fix]');
       if (!btn) return;
-      camera.setFix(btn.getAttribute('data-cam-fix'));
+      const fix = btn.getAttribute('data-cam-fix');
+      camera.setFix(fix);
       updateOrientationUI();
+      if (fix === 'mirror') showCameraNotice('Mode Kamera: Mirror (Cermin)');
+      else if (fix === 'none') showCameraNotice('Mode Kamera: Mirrorless (Normal)');
+      else if (fix === 'rotate180') showCameraNotice('Mode Kamera: Balik 180°');
     });
   }
 

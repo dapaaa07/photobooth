@@ -600,6 +600,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } else if (state.selectedLayout === '3-strip') {
         state.frameTheme = 'diesnat-3x1_1';
+      } else if (state.selectedLayout === '2x2-grid') {
+        state.frameTheme = 'diesnat-2x2_1';
+      } else if (state.selectedLayout === 'polaroid') {
+        state.frameTheme = 'diesnat-polaroid_1';
       } else {
         state.frameTheme = null;
       }

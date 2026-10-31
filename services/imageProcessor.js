@@ -51,25 +51,60 @@ async function applyFilter(imageBuffer, filterName) {
 
   switch (filterName) {
     case 'bw':
-      pipeline = pipeline.grayscale();
+      pipeline = pipeline.grayscale().linear(1.1, -10);
+      break;
+    case 'noir':
+      pipeline = pipeline.grayscale().linear(1.4, -45);
+      break;
+    case 'warm':
+      pipeline = pipeline
+        .modulate({ brightness: 1.05, saturation: 1.2 })
+        .tint({ r: 255, g: 235, b: 205 });
+      break;
+    case 'cool':
+      pipeline = pipeline
+        .modulate({ brightness: 1.04, saturation: 0.9 })
+        .tint({ r: 215, g: 235, b: 255 });
       break;
     case 'vintage':
       pipeline = pipeline
-        .modulate({ brightness: 1.05, saturation: 0.75 })
+        .modulate({ brightness: 1.05, saturation: 0.8 })
         .tint({ r: 240, g: 215, b: 180 });
       break;
-    case 'vivid':
-      pipeline = pipeline.modulate({ brightness: 1.05, saturation: 1.35 });
-      break;
-    case 'cyber':
+    case 'pastel':
       pipeline = pipeline
-        .modulate({ brightness: 1.1, saturation: 1.2 })
-        .tint({ r: 180, g: 220, b: 255 });
+        .modulate({ brightness: 1.12, saturation: 1.15 })
+        .tint({ r: 255, g: 230, b: 235 });
+      break;
+    case 'rose':
+      pipeline = pipeline
+        .modulate({ brightness: 1.06, saturation: 1.25 })
+        .tint({ r: 255, g: 210, b: 220 });
+      break;
+    case 'vivid':
+      pipeline = pipeline
+        .modulate({ brightness: 1.04, saturation: 1.45 })
+        .linear(1.1, -10);
+      break;
+    case 'faded':
+      pipeline = pipeline
+        .modulate({ brightness: 1.08, saturation: 0.75 })
+        .linear(0.9, 15);
+      break;
+    case 'emerald':
+      pipeline = pipeline
+        .modulate({ brightness: 1.02, saturation: 1.1 })
+        .tint({ r: 205, g: 240, b: 220 });
       break;
     case 'sepia':
       pipeline = pipeline
         .grayscale()
         .tint({ r: 112, g: 66, b: 20 });
+      break;
+    case 'cyber':
+      pipeline = pipeline
+        .modulate({ brightness: 1.1, saturation: 1.3 })
+        .tint({ r: 180, g: 220, b: 255 });
       break;
     case 'normal':
     default:
@@ -111,6 +146,19 @@ const DIESNAT_SLOT_RECTS = {
       [0.1361, 0.1108, 0.7125, 0.1796],
       [0.1514, 0.3766, 0.7074, 0.1796],
       [0.1514, 0.6424, 0.7125, 0.1779]
+    ]
+  },
+  '2x2-grid': {
+    'diesnat-2x2_1': [
+      [0.1210, 0.1301, 0.3117, 0.2960],
+      [0.5698, 0.1256, 0.3143, 0.3045],
+      [0.1210, 0.4700, 0.3134, 0.3039],
+      [0.5715, 0.4790, 0.3117, 0.2949]
+    ]
+  },
+  'polaroid': {
+    'diesnat-polaroid_1': [
+      [0.0668, 0.4039, 0.8994, 0.4146]
     ]
   }
 };
@@ -245,50 +293,88 @@ async function createPhotoCollage(rawPhotoBase64Array, options = {}) {
     }
 
   } else if (layout === '2x2-grid') {
-    // 2x2 Grid (2400 x 3700 ULTRA HD)
-    canvasWidth = 2400;
-    canvasHeight = 3700;
-    const itemWidth = 1000;
-    const itemHeight = 1360; // Portrait photo slot
-    const leftMargin = 132;
-    const topMargin = 140;
-    const gap = 136;
+    const grid2x2Rects = (DIESNAT_SLOT_RECTS['2x2-grid'] || {})[theme];
+    if (grid2x2Rects) {
+      canvasWidth = 2400;
+      canvasHeight = 3600;
+      for (let i = 0; i < Math.min(4, photoBuffers.length); i++) {
+        const [rx, ry, rw, rh] = grid2x2Rects[i];
+        const itemWidthPx = Math.round(rw * canvasWidth);
+        const itemHeightPx = Math.round(rh * canvasHeight);
+        const resized = await sharp(photoBuffers[i])
+          .resize(itemWidthPx, itemHeightPx, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
+          .toBuffer();
 
-    const coords = [
-      { left: leftMargin, top: topMargin },
-      { left: leftMargin + itemWidth + gap, top: topMargin },
-      { left: leftMargin, top: topMargin + itemHeight + gap },
-      { left: leftMargin + itemWidth + gap, top: topMargin + itemHeight + gap }
-    ];
+        compositeInputs.push({
+          input: resized,
+          left: Math.round(rx * canvasWidth),
+          top: Math.round(ry * canvasHeight)
+        });
+      }
+    } else {
+      // 2x2 Grid (2400 x 3700 ULTRA HD frameless fallback)
+      canvasWidth = 2400;
+      canvasHeight = 3700;
+      const itemWidth = 1000;
+      const itemHeight = 1360; // Portrait photo slot
+      const leftMargin = 132;
+      const topMargin = 140;
+      const gap = 136;
 
-    for (let i = 0; i < Math.min(4, photoBuffers.length); i++) {
-      const resized = await sharp(photoBuffers[i])
+      const coords = [
+        { left: leftMargin, top: topMargin },
+        { left: leftMargin + itemWidth + gap, top: topMargin },
+        { left: leftMargin, top: topMargin + itemHeight + gap },
+        { left: leftMargin + itemWidth + gap, top: topMargin + itemHeight + gap }
+      ];
+
+      for (let i = 0; i < Math.min(4, photoBuffers.length); i++) {
+        const resized = await sharp(photoBuffers[i])
+          .resize(itemWidth, itemHeight, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
+          .toBuffer();
+
+        compositeInputs.push({
+          input: resized,
+          left: coords[i].left,
+          top: coords[i].top
+        });
+      }
+    }
+
+  } else if (layout === 'polaroid') {
+    const polaroidRects = (DIESNAT_SLOT_RECTS['polaroid'] || {})[theme];
+    if (polaroidRects) {
+      canvasWidth = 2400;
+      canvasHeight = 3600;
+      const [rx, ry, rw, rh] = polaroidRects[0];
+      const itemWidthPx = Math.round(rw * canvasWidth);
+      const itemHeightPx = Math.round(rh * canvasHeight);
+      const resized = await sharp(photoBuffers[0] || photoBuffers[photoBuffers.length - 1])
+        .resize(itemWidthPx, itemHeightPx, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
+        .toBuffer();
+
+      compositeInputs.push({
+        input: resized,
+        left: Math.round(rx * canvasWidth),
+        top: Math.round(ry * canvasHeight)
+      });
+    } else {
+      // Polaroid (2400 x 3400 ULTRA HD frameless fallback)
+      canvasWidth = 2400;
+      canvasHeight = 3400;
+      const itemWidth = 2080;
+      const itemHeight = 2600; // Portrait photo slot
+
+      const resized = await sharp(photoBuffers[0] || photoBuffers[photoBuffers.length - 1])
         .resize(itemWidth, itemHeight, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
         .toBuffer();
 
       compositeInputs.push({
         input: resized,
-        left: coords[i].left,
-        top: coords[i].top
+        left: 160,
+        top: 160
       });
     }
-
-  } else if (layout === 'polaroid') {
-    // Polaroid (2400 x 3400 ULTRA HD)
-    canvasWidth = 2400;
-    canvasHeight = 3400;
-    const itemWidth = 2080;
-    const itemHeight = 2600; // Portrait photo slot
-
-    const resized = await sharp(photoBuffers[0] || photoBuffers[photoBuffers.length - 1])
-      .resize(itemWidth, itemHeight, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
-      .toBuffer();
-
-    compositeInputs.push({
-      input: resized,
-      left: 160,
-      top: 160
-    });
 
   }
 

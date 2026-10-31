@@ -226,8 +226,12 @@ class PhotoboothCamera {
       return frameTheme === 'diesnat-3x2_2' ? 0.9619 : 1.0628;
     }
     if (layout === '3-strip') return 1.7632;
-    if (layout === '2x2-grid') return 1000 / 1360;
-    if (layout === 'polaroid') return 2080 / 2600;
+    if (layout === '2x2-grid') {
+      return frameTheme === 'diesnat-2x2_1' ? 0.697 : 1000 / 1360;
+    }
+    if (layout === 'polaroid') {
+      return frameTheme === 'diesnat-polaroid_1' ? 1.4698 : 2080 / 2600;
+    }
     return null;
   }
 
@@ -491,5 +495,7 @@ window.PhotoboothCamera = PhotoboothCamera;
  */
 PhotoboothCamera.LAYOUT_MINI_THEMES = {
   '3x2-grid': 'diesnat-3x2_1',   // Diesnat Denim (frame default layout ini)
-  '3-strip': 'diesnat-3x1_1'     // Diesnat Strip
+  '3-strip': 'diesnat-3x1_1',    // Diesnat Strip
+  '2x2-grid': 'diesnat-2x2_1',   // Diesnat Pride
+  'polaroid': 'diesnat-polaroid_1' // Diesnat News
 };

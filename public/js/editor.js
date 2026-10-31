@@ -44,6 +44,10 @@ class PhotoboothEditor {
       }
     } else if (this.layout === '3-strip') {
       this.frameTheme = 'diesnat-3x1_1';
+    } else if (this.layout === '2x2-grid') {
+      this.frameTheme = 'diesnat-2x2_1';
+    } else if (this.layout === 'polaroid') {
+      this.frameTheme = 'diesnat-polaroid_1';
     } else {
       this.frameTheme = null;
     }
@@ -136,11 +140,21 @@ class PhotoboothEditor {
       this.canvas.width = 600;
       this.canvas.height = 1350;
     } else if (this.layout === '2x2-grid') {
-      this.canvas.width = 600;
-      this.canvas.height = 925;
+      if (this.frameTheme === 'diesnat-2x2_1') {
+        this.canvas.width = 600;
+        this.canvas.height = 900;
+      } else {
+        this.canvas.width = 600;
+        this.canvas.height = 925;
+      }
     } else if (this.layout === 'polaroid') {
-      this.canvas.width = 600;
-      this.canvas.height = 850;
+      if (this.frameTheme === 'diesnat-polaroid_1') {
+        this.canvas.width = 600;
+        this.canvas.height = 900;
+      } else {
+        this.canvas.width = 600;
+        this.canvas.height = 850;
+      }
     } else {
       this.canvas.width = 600;
       this.canvas.height = 1550;
@@ -163,15 +177,29 @@ class PhotoboothEditor {
       
       // Apply CSS-like canvas filters
       if (this.filter === 'bw') {
-        this.ctx.filter = 'grayscale(100%)';
+        this.ctx.filter = 'grayscale(100%) contrast(108%)';
+      } else if (this.filter === 'noir') {
+        this.ctx.filter = 'grayscale(100%) contrast(145%) brightness(95%)';
+      } else if (this.filter === 'warm') {
+        this.ctx.filter = 'sepia(25%) saturate(125%) brightness(105%)';
+      } else if (this.filter === 'cool') {
+        this.ctx.filter = 'contrast(102%) brightness(104%) saturate(92%) hue-rotate(10deg)';
       } else if (this.filter === 'vintage') {
         this.ctx.filter = 'sepia(40%) contrast(110%) brightness(105%)';
+      } else if (this.filter === 'pastel') {
+        this.ctx.filter = 'brightness(112%) saturate(115%) contrast(96%)';
+      } else if (this.filter === 'rose') {
+        this.ctx.filter = 'sepia(18%) saturate(125%) hue-rotate(320deg) brightness(106%)';
       } else if (this.filter === 'vivid') {
-        this.ctx.filter = 'saturate(160%) brightness(105%)';
-      } else if (this.filter === 'cyber') {
-        this.ctx.filter = 'hue-rotate(180deg) saturate(140%)';
+        this.ctx.filter = 'saturate(155%) contrast(108%) brightness(103%)';
+      } else if (this.filter === 'faded') {
+        this.ctx.filter = 'contrast(92%) brightness(108%) saturate(75%)';
+      } else if (this.filter === 'emerald') {
+        this.ctx.filter = 'sepia(20%) hue-rotate(70deg) saturate(110%) brightness(102%)';
       } else if (this.filter === 'sepia') {
-        this.ctx.filter = 'sepia(90%)';
+        this.ctx.filter = 'sepia(85%) contrast(105%)';
+      } else if (this.filter === 'cyber') {
+        this.ctx.filter = 'hue-rotate(180deg) saturate(140%) brightness(105%)';
       } else {
         this.ctx.filter = 'none';
       }
@@ -261,27 +289,45 @@ class PhotoboothEditor {
       }
 
     } else if (this.layout === '2x2-grid') {
-      const slotW = 250;
-      const slotH = 340; // Portrait slot
-      const marginX = 33;
-      const marginY = 35;
-      const gap = 34;
+      if (this.frameTheme === 'diesnat-2x2_1') {
+        const rects = [
+          [0.1210, 0.1301, 0.3117, 0.2960],
+          [0.5698, 0.1256, 0.3143, 0.3045],
+          [0.1210, 0.4700, 0.3134, 0.3039],
+          [0.5715, 0.4790, 0.3117, 0.2949]
+        ];
+        for (let i = 0; i < Math.min(4, loadedImages.length); i++) {
+          const [rx, ry, rw, rh] = rects[i];
+          drawSlot(loadedImages[i], rx * w, ry * h, rw * w, rh * h);
+        }
+      } else {
+        const slotW = 250;
+        const slotH = 340; // Portrait slot
+        const marginX = 33;
+        const marginY = 35;
+        const gap = 34;
 
-      const coords = [
-        { x: marginX, y: marginY },
-        { x: marginX + slotW + gap, y: marginY },
-        { x: marginX, y: marginY + slotH + gap },
-        { x: marginX + slotW + gap, y: marginY + slotH + gap }
-      ];
+        const coords = [
+          { x: marginX, y: marginY },
+          { x: marginX + slotW + gap, y: marginY },
+          { x: marginX, y: marginY + slotH + gap },
+          { x: marginX + slotW + gap, y: marginY + slotH + gap }
+        ];
 
-      for (let i = 0; i < Math.min(4, loadedImages.length); i++) {
-        drawSlot(loadedImages[i], coords[i].x, coords[i].y, slotW, slotH);
+        for (let i = 0; i < Math.min(4, loadedImages.length); i++) {
+          drawSlot(loadedImages[i], coords[i].x, coords[i].y, slotW, slotH);
+        }
       }
 
     } else if (this.layout === 'polaroid') {
-      const slotW = 520;
-      const slotH = 650; // Portrait slot
-      drawSlot(loadedImages[0] || loadedImages[loadedImages.length - 1], 40, 40, slotW, slotH);
+      if (this.frameTheme === 'diesnat-polaroid_1') {
+        const [rx, ry, rw, rh] = [0.0668, 0.4039, 0.8994, 0.4146];
+        drawSlot(loadedImages[0] || loadedImages[loadedImages.length - 1], rx * w, ry * h, rw * w, rh * h);
+      } else {
+        const slotW = 520;
+        const slotH = 650; // Portrait slot
+        drawSlot(loadedImages[0] || loadedImages[loadedImages.length - 1], 40, 40, slotW, slotH);
+      }
 
     } else {
       // 4-Photo Strip (4 Portrait Slots)

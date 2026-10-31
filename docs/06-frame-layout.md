@@ -6,8 +6,8 @@
 |---|---|---|---|
 | `3x2-grid` | 3 → 6, pola `[A,B,B,C,C,A]` | 2400×3700 | Denim / Lace (pilih) |
 | `3-strip` | 3 → 3 `[A,B,C]` | 2400×5400 | Strip (otomatis) |
-| `2x2-grid` | 2 → 4 `[A,B,B,A]` | 2400×3700, slot 1000×1360 | Tanpa frame |
-| `polaroid` | 1 → 1 | 2400×3400, slot 2080×2600 di (160,160) | Tanpa frame |
+| `2x2-grid` | 2 → 4 `[A,B,B,A]` | 2400×3600 | Pride (otomatis) / fallback tanpa frame 2400×3700 |
+| `polaroid` | 1 → 1 | 2400×3600 | News (otomatis) / fallback tanpa frame 2400×3400 |
 
 `4-strip` dihapus dari UI, server, dan editor. Foto selalu di-`cover`-crop
 ke slot (kelebihan dibuang simetris tengah) — lihat catatan crop di bawah.
@@ -19,6 +19,8 @@ ke slot (kelebihan dibuang simetris tengah) — lihat catatan crop di bawah.
 | `diesnat-3x2_1.png` | Diesnat Denim (default) | 3x2-grid | 6 jendela, kolom x 11,69/62,24%, baris y 15,25/38,96/63,02% |
 | `diesnat-3x2_2.png` | Diesnat Lace | 3x2-grid | 6 jendela ±30×20%, kolom x 15,25/64,78%, baris y 7,45/30,66/54,6% |
 | `diesnat-3x1_1.png` | Diesnat Strip | 3-strip | 3 jendela landscape ±70×17%, baris y 11,68/38,26/64,84% |
+| `diesnat-2x2_1.png` | Diesnat Pride | 2x2-grid | 4 jendela (kombinasi kotak & kubah arch) ±30×29%, kolom x 12,7/57,6%, baris y 13,6/47,6% |
+| `diesnat-polaroid_1.png` | Diesnat News | polaroid | 1 jendela landscape ±88,7×40,3%, x 7,28%, y 40,99% |
 
 PNG adalah overlay: lubang **transparan** (foto di bawah), ornamen di atas foto.
 Koordinat kode = hasil pindai + padding 0,6% tiap sisi, disimpan di
